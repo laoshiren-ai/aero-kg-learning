@@ -142,27 +142,64 @@
   };
 
   /* ═══ LLM_SLOT ═══════════════════════════════════
-     预留大模型接入位：把 explore() 的规则结果换成真实 LLM。
-     接法：POST 到你的推理端点，让模型从 KG 节点列表中选择
-     path 节点 id 序列并给出每步理由，前端无需其他改动。
+     AI 学习路径规划（经 Vercel Serverless 代理 /api/chat 调用智谱 glm-4-flash）
+     · API Key 只存在 Vercel 服务端环境变量 ZHIPU_API_KEY，前端零密钥
+     · 静态托管（GitHub Pages 等）下 /api/chat 不存在 → ask() 返回 null
+       → 调用方自动回退到本地规则引擎 explore()，网站永不报错
      ═══════════════════════════════════════════════ */
   Guide.LLM_SLOT = {
-    enabled: false,                    // 接入后改为 true
-    endpoint: '',                      // 如 https://your-api/v1/chat
-    apiKey: '',
+    enabled: true,
+    endpoint: '/api/chat',             // Vercel 部署后自动生效；本地静态预览自动回退
+    apiKey: '',                        // 刻意留空：密钥在服务端，前端永远接触不到
+
     async ask(question, kgSummary) {
-      if (!this.enabled) return null;   // 未接入时由规则引擎接管
-      const res = await fetch(this.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.apiKey}` },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: '你是航空航天学习向导。根据给定知识图谱节点列表，为用户问题规划 3-5 站学习路径，返回 JSON：{title, intro, steps:[{id, name, note}]}' },
-            { role: 'user', content: `问题：${question}\n可用节点：${kgSummary}` }
-          ]
-        })
-      });
-      return res.json();
+      try {
+        const res = await fetch(this.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: [
+              '你是「航空航天知识图谱」网站的 AI 学习向导。',
+              '任务：针对用户问题规划一条 3-6 站学习路径（不直接灌输答案），说明每站解决什么。',
+              '只能使用【参考资料】中列出的概念，必须用其竖线前的英文 id，按学习先后排序。',
+              '严格输出一个 JSON 对象，不要 markdown 代码块，格式：',
+              '{"title":"路径标题","intro":"一句话说明该路径为何能回答问题","steps":[{"id":"节点id","why":"这一站解决什么"}]}',
+              '',
+              '用户问题：' + question
+            ].join('\n'),
+            context: kgSummary || ''
+          })
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || data.ok !== true || !data.answer) return null;
+        // 从回答中提取 JSON（容忍模型用 ```json 包裹）
+        const m = data.answer.match(/\{[\s\S]*\}/);
+        if (!m) return null;
+        let plan;
+        try { plan = JSON.parse(m[0]); } catch (e) { return null; }
+        const KG = window.AeroKG;
+        const steps = (Array.isArray(plan.steps) ? plan.steps : [])
+          .map(s => {
+            const n = KG.nodeMap[s && s.id];
+            if (!n) return null; // 模型给了图谱外的 id → 丢弃该站
+            const why = (s && typeof s.why === 'string' && s.why.trim())
+              ? s.why.trim() : n.definition;
+            return { id: n.id, name: n.name, note: why.slice(0, 80) };
+          })
+          .filter(Boolean);
+        if (steps.length < 2) return null; // 有效站点太少 → 回退规则引擎
+        return {
+          question: question,
+          title: (typeof plan.title === 'string' && plan.title.trim()) || ('围绕「' + question + '」的 AI 路径'),
+          intro: (typeof plan.intro === 'string' && plan.intro.trim()) || 'AI 向导根据知识图谱为你规划的路径：',
+          steps: steps,
+          curated: false,
+          ai: true
+        };
+      } catch (e) {
+        return null; // 静态托管 404 / 网络异常 → 回退规则引擎
+      }
     }
   };
 

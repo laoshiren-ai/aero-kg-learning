@@ -35,15 +35,23 @@ python -m http.server 8080     # 或 npx serve .
 2. `Settings → Pages → Source: Deploy from a branch → main / (root)`
 3. 访问 `https://<你的用户名>.github.io/aero-kg-learning/`
 
-### Vercel
-1. [vercel.com/new](https://vercel.com/new) 导入本仓库
-2. Framework Preset 选 **Other**，零配置直接 Deploy
+### Vercel（推荐：同时获得 AI 学习向导）
+1. [vercel.com/new](https://vercel.com/new) 导入本仓库，Framework Preset 选 **Other**，零配置 Deploy
+2. 开启 AI 向导：项目 → **Settings → Environment Variables** 添加
+   - `ZHIPU_API_KEY` = 你的智谱 API Key（[open.bigmodel.cn](https://open.bigmodel.cn) 获取）
+3. 重新部署后，`api/chat.js` 自动成为 Serverless 函数（`/api/chat`）：
+   - 前端 `prompt` + 检索到的图谱 `context` → 服务端持钥调用智谱 `glm-4-flash` → 返回回答
+   - Key 永不下发浏览器；探索模式的路径规划自动升级为 AI 规划（带 🤖 徽标）
+4. 同一仓库若部署在 GitHub Pages（纯静态），AI 探测失败会**自动回退**到内置规则引擎，功能不缺失
+
+> 本地调试 Serverless：`npm i -g vercel && vercel dev`（需先配置环境变量）。
 
 ## 🗂️ 目录结构
 
 ```
 aero-kg-learning/
 ├── index.html          # 单页应用（图谱 / AI 向导 / 关于 三视图）
+├── api/chat.js         # Vercel Serverless：智谱 glm-4-flash 代理（CORS / 密钥服务端保存）
 ├── css/style.css       # 浅色主题 + 响应式（≤900px 切抽屉）
 ├── js/
 │   ├── kg 数据见 data/；渲染见 graph.js；编排见 app.js

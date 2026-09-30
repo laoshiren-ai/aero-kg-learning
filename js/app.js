@@ -155,11 +155,27 @@
 
     /* ── 向导视图 ── */
     bindGuide() {
-      const ask = () => {
+      const ask = async () => {
         const q = $('exploreInput').value.trim();
         if (!q) return;
-        const r = Guide.explore(q);
-        this.renderExplore(r);
+        const btn = $('btnExplore');
+        btn.disabled = true; btn.textContent = '规划中…';
+        try {
+          // ① 先尝试 AI 规划（Vercel 部署时经 /api/chat 调 glm-4-flash）
+          // ② 静态托管 / 接口异常 → 自动回退本地规则引擎
+          let r = null;
+          const KG = AeroKG;
+          const summary = KG.search(q, 12)
+            .map(n => `${n.id} | ${n.name} | ${(n.definition || '').slice(0, 50)}`)
+            .join('\n');
+          if (Guide.LLM_SLOT && Guide.LLM_SLOT.enabled) {
+            try { r = await Guide.LLM_SLOT.ask(q, summary); } catch (e) { r = null; }
+          }
+          if (!r) r = Guide.explore(q);
+          this.renderExplore(r);
+        } finally {
+          btn.disabled = false; btn.textContent = '规划路径';
+        }
       };
       $('btnExplore').addEventListener('click', ask);
       $('exploreInput').addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
@@ -184,7 +200,7 @@
       box.innerHTML = `
         <div class="path-card">
           <div class="path-head">
-            <b>🧭 ${esc(r.title)}</b>
+            <b>🧭 ${esc(r.title)}</b>${r.ai ? '<span class="ai-badge">🤖 AI 规划</span>' : ''}
             <div class="path-q">针对你的问题：「${esc(r.question)}」</div>
           </div>
           <div class="path-steps">
