@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>航空航天知识图谱学习向导</title>
+<meta name="description" content="基于《航空航天概论》(第3版, 贾玉红主编) 构建的交互式知识图谱学习网站 —— 关键词检索 · 图谱漫游 · AI 学习路径推荐">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══════════ 顶栏 ═══════════ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand" id="brandHome" title="回到全图">
+      <span class="brand-icon">🛰️</span>
+      <div class="brand-text">
+        <div class="brand-name">航空航天知识图谱</div>
+        <div class="brand-sub">AeroKG 学习向导 · 依据《航空航天概论》第3版</div>
+      </div>
+    </div>
+
+    <div class="searchbox" id="searchbox">
+      <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.5-4.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <input id="searchInput" type="text" placeholder="搜索知识点，如：涡轮风扇发动机、伯努利定理、升力…" autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <nav class="topnav">
+      <button class="nav-btn active" data-view="graph">知识图谱</button>
+      <button class="nav-btn" data-view="guide">AI 学习向导</button>
+      <button class="nav-btn" data-view="about">关于</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════ 主区 ═══════════ -->
+<main class="main">
+
+  <!-- 视图1: 知识图谱 -->
+  <section class="view view-graph active" id="view-graph">
+    <div class="graph-wrap">
+      <div id="graphCanvas"></div>
+
+      <!-- 图例 -->
+      <div class="graph-legend" id="graphLegend"></div>
+
+      <!-- 图谱工具条 -->
+      <div class="graph-tools">
+        <button id="btnResetView" title="复位视图">⌂</button>
+        <button id="btnRelayout" title="重新布局">⟳</button>
+        <button id="btnTrail" title="高亮我的足迹">足迹</button>
+      </div>
+
+      <!-- 概览统计 -->
+      <div class="graph-stats" id="graphStats"></div>
+    </div>
+
+    <!-- 详情侧栏 -->
+    <aside class="detail-panel" id="detailPanel">
+      <div class="detail-empty" id="detailEmpty">
+        <div class="empty-icon">🌌</div>
+        <p>点击图谱中的任意节点<br>查看定义、关系与学习建议</p>
+        <p class="empty-hint">或在顶部搜索关键词</p>
+      </div>
+      <div class="detail-body" id="detailBody" style="display:none"></div>
+    </aside>
+  </section>
+
+  <!-- 视图2: AI 学习向导 -->
+  <section class="view view-guide" id="view-guide">
+    <div class="guide-wrap">
+      <div class="guide-left">
+        <div class="guide-card">
+          <h3>🧭 探索模式</h3>
+          <p class="guide-tip">提一个问题，AI 不直接给答案，而是为你规划一条学习路径 —— 每一站都可点击深入。</p>
+          <div class="ask-row">
+            <input id="exploreInput" type="text" placeholder="例如：为什么飞机能飞起来？">
+            <button id="btnExplore" class="btn-primary">规划路径</button>
+          </div>
+          <div class="explore-chips" id="exploreChips">
+            <span class="chip-sample">为什么飞机能飞起来？</span>
+            <span class="chip-sample">涡扇和涡喷有什么区别？</span>
+            <span class="chip-sample">火箭是怎么上天的？</span>
+            <span class="chip-sample">飞机为什么会失速？</span>
+          </div>
+          <div id="exploreResult"></div>
+        </div>
+
+        <div class="guide-card">
+          <h3>📍 基于你正在看的节点</h3>
+          <div id="guideContext"><p class="guide-muted">你还没有浏览任何节点。回到「知识图谱」点一个节点，我就会给出下一步建议。</p></div>
+        </div>
+      </div>
+
+      <div class="guide-right">
+        <div class="guide-card">
+          <h3>🗺️ 我的知识地图</h3>
+          <div class="map-summary" id="mapSummary"></div>
+          <div class="trail-list" id="trailList"></div>
+          <button id="btnClearTrail" class="btn-ghost btn-sm">清空足迹</button>
+        </div>
+        <div class="guide-card">
+          <h3>⭐ 精选学习路径</h3>
+          <div id="curatedPaths"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 视图3: 关于 -->
+  <section class="view view-about" id="view-about">
+    <div class="about-wrap">
+      <div class="guide-card">
+        <h3>🛰️ 关于本项目</h3>
+        <p><b>航空航天知识图谱学习向导（AeroKG）</b>是一个轻量化学习网站：把一本权威教材转化为可交互、可漫游、有 AI 向导的知识网络。</p>
+        <ul>
+          <li><b>数据来源</b>：《航空航天概论》第 3 版（贾玉红主编，北京航空航天大学出版社）。实体与关系由 AI 从教材第 2 章「飞行器飞行原理」、第 3 章「飞行器动力装置」的 OCR 文本中自动抽取，每条定义与关系均标注书页出处。</li>
+          <li><b>知识图谱</b>：节点为核心概念，边分五类 —— <span class="edge-demo t1">从属</span> <span class="edge-demo t2">包含</span> <span class="edge-demo t3">并列</span> <span class="edge-demo t4">关联</span> <span class="edge-demo t5">因果</span>。支持缩放、拖拽、点击进入详情。</li>
+          <li><b>AI 学习向导</b>：基于图谱关系的规则引擎 —— 记录浏览足迹、推荐下一步、把问题转化为学习路径（预留大模型 API 接入位，见 <code>js/guide.js</code>）。</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h3>🏭 OPC 工作流：一人公司 + AI 员工</h3>
+        <p>本项目是「一人公司 + AI 员工」模式的一次完整演示 —— 你（产品经理）只提需求与验收，AI 员工完成其余全部工序：</p>
+        <div class="pipeline">
+          <div class="pipe-step"><div class="pipe-num">1</div><b>资料解析</b><span>AI 解析 298 页扫描版教材：定位目录、OCR 两个核心章节（112 页）</span></div>
+          <div class="pipe-step"><div class="pipe-num">2</div><b>知识抽取</b><span>AI 按本体方法学抽取概念、定义与五类关系，带书页证据</span></div>
+          <div class="pipe-step"><div class="pipe-num">3</div><b>图谱构建</b><span>AI 编译为节点/边 JSON，做代表情形表达检查与覆盖核对</span></div>
+          <div class="pipe-step"><div class="pipe-num">4</div><b>网站生成</b><span>AI 生成响应式前端：图谱渲染、检索、详情、AI 向导</span></div>
+          <div class="pipe-step"><div class="pipe-num">5</div><b>部署交付</b><span>AI 准备 Git 仓库与部署说明，产品经理审核后一键发布</span></div>
+        </div>
+        <p class="about-note">产品经理负责：验收知识准确性、提出迭代方向。AI 员工负责：其余一切。</p>
+      </div>
+      <div class="guide-card">
+        <h3>⚖️ 声明</h3>
+        <p>本站为学习演示项目。知识条目摘编自上述教材并标注出处，仅用于教学演示；多媒体区域为占位建议（推荐 NASA、维基百科、B站公开课等公开资源）。「检查通过」只表示当前用例可表达，不表示已覆盖原书全部内容 —— 最终请以教材原文为准。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 移动端详情抽屉遮罩 -->
+<div class="drawer-mask" id="drawerMask"></div>
+
+<footer class="footbar">
+  <span>数据源：《航空航天概论》第3版 · 贾玉红主编</span>
+  <span id="footStats"></span>
+</footer>
+
+<script src="vendor/echarts.min.js"></script>
+<script src="data/kg.js"></script>
+<script src="data/paths.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/search.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
