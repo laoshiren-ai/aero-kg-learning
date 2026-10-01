@@ -65,6 +65,8 @@ module.exports = async function handler(req, res) {
 
   const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
   const context = typeof body.context === 'string' ? body.context.trim() : '';
+  // mode='path' 用于「AI 学习向导」的路径规划（要求严格 JSON 输出，不适用简洁约束）；默认 'qa' 即时问答
+  const isPath = body.mode === 'path';
   if (!prompt) {
     return res.status(400).json({ ok: false, error: '缺少 prompt 字段（用户问题）' });
   }
@@ -80,6 +82,24 @@ module.exports = async function handler(req, res) {
     ? `【参考资料】\n${context}\n\n【用户问题】\n${prompt}`
     : prompt;
 
+  // 两种用途用不同的系统提示：'path' 要求严格 JSON（不限制字数），'qa' 要求简洁
+  const systemPrompt = isPath
+    ? [
+        '你是「航空航天知识图谱」网站的 AI 学习向导。',
+        '任务：针对用户问题规划一条 4-6 站的学习路径（引导学习，不直接灌输答案），说明每一站解决什么。',
+        '优先沿因果关系推进：先建立原理，再落到结构与限制，不要只罗列名词。',
+        '只能使用【参考资料】中列出的概念，必须使用其括号内的英文 id，按学习先后排序。',
+        '严格只输出一个 JSON 对象，不要 markdown 代码块、不要任何解释文字，格式：',
+        '{"title":"路径标题","intro":"一句话说明该路径为何能回答这个问题","steps":[{"id":"节点id","why":"这一站解决什么"}]}'
+      ].join('')
+    : [
+        '你是「航空航天知识图谱」网站的 AI 学习助手。',
+        '优先依据【参考资料】回答，并在合适时引用资料中的概念名与书页出处。',
+        '资料不足以回答时，明确说明哪部分超出了资料范围，不要编造。',
+        '回答要简洁聚焦：默认用 2-4 句话或要点列表直接回答问题，控制在 400 字以内；',
+        '只有用户明确要求详细展开时才展开。'
+      ].join('');
+
   try {
     const upstream = await fetch(ZHIPU_URL, {
       method: 'POST',
@@ -90,13 +110,10 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         model: MODEL,
         stream: false,
-        temperature: 0.6,
-        max_tokens: 1024,
+        temperature: isPath ? 0.3 : 0.6,
+        max_tokens: isPath ? 1200 : 800,
         messages: [
-          {
-            role: 'system',
-            content: '你是一个严谨的航空航天学习助手。优先依据参考资料回答；资料不足以回答时，明确说明哪些部分超出了资料范围，不要编造。'
-          },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent }
         ]
       }),

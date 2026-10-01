@@ -151,6 +151,7 @@
     enabled: true,
     endpoint: '/api/chat',             // 由 server.js 提供；纯静态托管下自动回退
     apiKey: '',                        // 刻意留空：密钥在服务端，前端永远接触不到
+    TIMEOUT_MS: 25000,                 // 客户端超时（服务端 28s 熔断在后，这里先截断以免按钮长时间无响应）
 
     async ask(question, kgSummary) {
       try {
@@ -158,9 +159,10 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            mode: 'path',                 // 服务端据此改用「严格 JSON 输出」的系统提示
             prompt: [
               '你是「航空航天知识图谱」网站的 AI 学习向导。',
-              '任务：针对用户问题规划一条 3-6 站学习路径（不直接灌输答案），说明每站解决什么。',
+              '任务：针对用户问题规划一条 4-6 站学习路径（不直接灌输答案），说明每站解决什么。',
               '只能使用【参考资料】中列出的概念，必须用其竖线前的英文 id，按学习先后排序。',
               '严格输出一个 JSON 对象，不要 markdown 代码块，格式：',
               '{"title":"路径标题","intro":"一句话说明该路径为何能回答问题","steps":[{"id":"节点id","why":"这一站解决什么"}]}',
@@ -168,7 +170,8 @@
               '用户问题：' + question
             ].join('\n'),
             context: kgSummary || ''
-          })
+          }),
+          signal: (window.AbortSignal && AbortSignal.timeout) ? AbortSignal.timeout(this.TIMEOUT_MS) : undefined
         });
         if (!res.ok) return null;
         const data = await res.json();
@@ -181,19 +184,24 @@
         const KG = window.AeroKG;
         const steps = (Array.isArray(plan.steps) ? plan.steps : [])
           .map(s => {
-            const n = KG.nodeMap[s && s.id];
+            // 模型可能给出多余空白 / 大小写不一致的 id，先清洗再校验
+            const raw = (s && typeof s.id === 'string') ? s.id.trim() : '';
+            const n = KG.nodeMap[raw] || KG.nodeMap[raw.toLowerCase()];
             if (!n) return null; // 模型给了图谱外的 id → 丢弃该站
             const why = (s && typeof s.why === 'string' && s.why.trim())
               ? s.why.trim() : n.definition;
-            return { id: n.id, name: n.name, note: why.slice(0, 80) };
+            return { id: n.id, name: n.name, note: String(why).slice(0, 80) };
           })
           .filter(Boolean);
-        if (steps.length < 2) return null; // 有效站点太少 → 回退规则引擎
+        // 去重（模型偶尔重复同一站）
+        const seen = new Set();
+        const uniq = steps.filter(s => (seen.has(s.id) ? false : (seen.add(s.id), true)));
+        if (uniq.length < 2) return null; // 有效站点太少 → 回退规则引擎
         return {
           question: question,
           title: (typeof plan.title === 'string' && plan.title.trim()) || ('围绕「' + question + '」的 AI 路径'),
           intro: (typeof plan.intro === 'string' && plan.intro.trim()) || 'AI 向导根据知识图谱为你规划的路径：',
-          steps: steps,
+          steps: uniq,
           curated: false,
           ai: true
         };

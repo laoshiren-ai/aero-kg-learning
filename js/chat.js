@@ -114,64 +114,11 @@
   function hideTyping() { if (typingEl) { typingEl.remove(); typingEl = null; } }
   function setSending(v) { sending = v; sendBtn.disabled = v; }
 
-  /* ─────────── 检索：问题→节点（闭式词表反向包含 + 滑窗兜底）→ 一跳扩展 ───────────
-     用户问的是完整句子（如「为什么飞机能飞起来？」），
-     KG.search 是「名字包含查询词」的子串匹配，对整句必然落空；
-     因此主策略反过来：节点名 / 别名 是否出现在问题里（词表封闭，约150节点，O(N)），
-     全落空时再用 2-4 字滑窗走 KG.search 兜底（命中定义 / 别名文本）。 */
+  /* ─────────── 检索：委派给共享的 AeroRetrieve（见 js/retrieve.js） ───────────
+     反向包含 + 滑窗兜底 + 一跳关系扩展，chat.js 与 app.js 探索模式共用同一套检索，
+     避免两处逻辑漂移。 */
   function retrieve(q) {
-    const KG = AeroKG;
-    const score = {};
-    const add = (n, w) => { if (n && n.id) score[n.id] = (score[n.id] || 0) + w; };
-
-    // ① 反向包含：节点名 / 别名出现在问题中，名字越长权重越高
-    KG.nodes.forEach(n => {
-      if (n.name && n.name.length >= 2 && q.indexOf(n.name) >= 0) add(n, 10 + n.name.length);
-      (n.aliases || []).forEach(a => { if (a && a.length >= 2 && q.indexOf(a) >= 0) add(n, 6 + a.length); });
-    });
-
-    // ② 兜底：2-4 字滑窗正向检索（长窗优先，命中定义/别名文本）
-    if (!Object.keys(score).length) {
-      const grams = [];
-      for (let L = Math.min(4, q.length); L >= 2; L--)
-        for (let i = 0; i + L <= q.length; i++) grams.push(q.slice(i, i + L));
-      grams.slice(0, 60).forEach(g =>
-        KG.search(g, 3).forEach(h => add(h, (h._score || 1) * 0.1)));
-    }
-
-    let hits = Object.keys(score).sort((a, b) => score[b] - score[a])
-      .map(id => KG.nodeMap[id]).filter(Boolean);
-    if (!hits.length) hits = KG.search(q, 6);
-    hits = hits.slice(0, 6);
-
-    const picked = [], seen = new Set();
-    const push = (n, top) => {
-      if (n && !seen.has(n.id) && picked.length < 10) { seen.add(n.id); picked.push({ n: n, top: top }); }
-    };
-    hits.forEach(h => push(h, true));
-    // 从前 3 个命中节点沿边扩展邻居（因果/关联优先），给模型更多图谱上下文
-    hits.slice(0, 3).forEach(h => {
-      KG.edgesOf(h.id).slice()
-        .sort((a, b) => ((b.type === '因果') - (a.type === '因果')) || ((b.type === '关联') - (a.type === '关联')))
-        .forEach(e => push(KG.nodeMap[e.s === h.id ? e.t : e.s], false));
-    });
-
-    let context = '';
-    for (const p of picked) {
-      const n = p.n;
-      const rels = KG.edgesOf(n.id).map(e => {
-        const other = KG.nodeMap[e.s === n.id ? e.t : e.s];
-        if (!other) return '';
-        return (e.s === n.id ? '→' : '←') + other.name + '（' + e.type + '）';
-      }).filter(Boolean).slice(0, 5).join('；');
-      const line = '【' + n.name + '】(' + n.id + ' · ' + (KG.categories[n.category] || n.category) +
-        (n.evidence ? ' · ' + n.evidence : '') + ')：' + (n.definition || '') +
-        (p.top && n.detail ? ' 详解：' + String(n.detail).slice(0, 130) : '') +
-        (rels ? ' 关系：' + rels : '');
-      if (context.length + line.length > MAX_CONTEXT) break;
-      context += line + '\n';
-    }
-    return { context: context.trim(), topHits: hits.slice(0, 4) };
+    return window.AeroRetrieve.context(q, { maxLen: MAX_CONTEXT });
   }
 
   /* ─────────── 提示词组装（含最近对话，支持追问） ─────────── */

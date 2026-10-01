@@ -161,17 +161,25 @@
         const btn = $('btnExplore');
         btn.disabled = true; btn.textContent = '规划中…';
         try {
-          // ① 先尝试 AI 规划（Vercel 部署时经 /api/chat 调 glm-4-flash）
-          // ② 静态托管 / 接口异常 → 自动回退本地规则引擎
+          // 规则引擎先跑一次：它管着 20 条人工精选路径（关键词匹配，瞬时返回）
+          const rule = Guide.explore(q);
+
+          // ① 命中精选路径 → 直接用。人工撰写的路径质量最好，且用户无需等待
+          if (rule && rule.curated) { this.renderExplore(rule); return; }
+
+          // ② 没命中 → 交给 AI 规划（检索见 js/retrieve.js；KG.search 对整句必然落空）
           let r = null;
-          const KG = AeroKG;
-          const summary = KG.search(q, 12)
-            .map(n => `${n.id} | ${n.name} | ${(n.definition || '').slice(0, 50)}`)
-            .join('\n');
-          if (Guide.LLM_SLOT && Guide.LLM_SLOT.enabled) {
-            try { r = await Guide.LLM_SLOT.ask(q, summary); } catch (e) { r = null; }
+          let seed = window.AeroRetrieve ? window.AeroRetrieve.summary(q, 12) : '';
+          // 把规则引擎给的图谱候选路径也作为种子，补足抽象问题（词面不含概念名）的检索盲区
+          if (rule && rule.steps && rule.steps.length) {
+            seed = rule.steps.map(s => `${s.id} | ${s.name} | ${s.note || ''}`).join('\n') + '\n' + seed;
           }
-          if (!r) r = Guide.explore(q);
+          if (Guide.LLM_SLOT && Guide.LLM_SLOT.enabled && seed) {
+            try { r = await Guide.LLM_SLOT.ask(q, seed); } catch (e) { r = null; }
+          }
+
+          // ③ AI 不可用 / 返回不合法 → 回退规则引擎结果
+          if (!r) r = rule;
           this.renderExplore(r);
         } finally {
           btn.disabled = false; btn.textContent = '规划路径';
