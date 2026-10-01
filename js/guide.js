@@ -142,14 +142,14 @@
   };
 
   /* ═══ LLM_SLOT ═══════════════════════════════════
-     AI 学习路径规划（经 Vercel Serverless 代理 /api/chat 调用智谱 glm-4-flash）
-     · API Key 只存在 Vercel 服务端环境变量 ZHIPU_API_KEY，前端零密钥
-     · 静态托管（GitHub Pages 等）下 /api/chat 不存在 → ask() 返回 null
+     AI 学习路径规划（经本站 Node 服务的 /api/chat 调用智谱 glm-4-flash）
+     · API Key 只存在服务端（环境变量 ZHIPU_API_KEY 或 server-config.json），前端零密钥
+     · 无后端时（如直接打开本地 html）ask() 返回 null
        → 调用方自动回退到本地规则引擎 explore()，网站永不报错
      ═══════════════════════════════════════════════ */
   Guide.LLM_SLOT = {
     enabled: true,
-    endpoint: '/api/chat',             // Vercel 部署后自动生效；本地静态预览自动回退
+    endpoint: '/api/chat',             // 由 server.js 提供；纯静态托管下自动回退
     apiKey: '',                        // 刻意留空：密钥在服务端，前端永远接触不到
 
     async ask(question, kgSummary) {

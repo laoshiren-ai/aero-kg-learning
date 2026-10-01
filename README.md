@@ -20,40 +20,64 @@
 
 ## 🚀 本地运行
 
-零依赖纯前端，无需构建：
+零依赖，无需构建。三种方式任选：
 
 ```bash
-# 方式一：直接双击 index.html
-# 方式二（推荐，避免个别浏览器 file:// 限制）：
-python -m http.server 8080     # 或 npx serve .
-# 打开 http://localhost:8080
+# 方式一（推荐）：单端口 Node 服务 = 静态页 + AI 代理，一条命令全都有
+ZHIPU_API_KEY=你的key node server.js        # Windows: set ZHIPU_API_KEY=... && node server.js
+# → http://localhost:3000
+
+# 方式二：只想看页面（没有 AI）
+python -m http.server 8080                   # 或直接双击 index.html
+
+# 方式三：只想调 AI 链路（不配环境变量也行，见「密钥配置」）
+node server.js
 ```
+
+> 页面放在本地 / 静态托管（file://、GitHub Pages）打开时，AI 探测会自动失败并**回退到内置规则引擎**，
+> 网站功能不缺失、不报错——只是问答窗口会提示你去看部署说明。
+
+## 🔑 密钥配置（开启 AI 问答 / AI 探索）
+
+AI 由智谱 `glm-4-flash` 驱动，服务端持钥、前端零密钥。Key 读取优先级：
+
+1. 环境变量 `ZHIPU_API_KEY`
+2. 项目根目录 `server-config.json` → `{ "zhipuApiKey": "你的key" }`（已被 `.gitignore` 排除，且被服务端 HTTP 屏蔽，永不外泄）
+
+都没有时，`/api/chat` 返回 500 并在窗口内提示如何配置——**页面其余功能完全不受影响**。
+
+Key 在 [open.bigmodel.cn](https://open.bigmodel.cn) 免费申请。**若返回 401「令牌已过期或验证不正确」，说明 Key 已失效，需重新生成。**
 
 ## 📦 部署
 
-### GitHub Pages
-1. Push 本仓库到 GitHub
-2. `Settings → Pages → Source: Deploy from a branch → main / (root)`
-3. 访问 `https://<你的用户名>.github.io/aero-kg-learning/`
+### 方式一：平台托管（Node 单端口服务 · 国内直连，推荐）
+`server.js` 是一个零依赖单端口服务，同时提供静态页与 `/api/chat`，**任何支持 Node 的平台都能跑**：
 
-### Vercel（推荐：同时获得 AI 学习向导）
+1. 平台从 `package.json` 识别 `npm start` → `node server.js`，自动注入 `PORT`，监听 `0.0.0.0`
+2. 配置环境变量 `ZHIPU_API_KEY`（或用 `server-config.json`）→ 重新部署即可启用 AI
+
+### 方式二：Vercel（海外，国内访问需代理）
 1. [vercel.com/new](https://vercel.com/new) 导入本仓库，Framework Preset 选 **Other**，零配置 Deploy
-2. 开启 AI 向导：项目 → **Settings → Environment Variables** 添加
-   - `ZHIPU_API_KEY` = 你的智谱 API Key（[open.bigmodel.cn](https://open.bigmodel.cn) 获取）
-3. 重新部署后，`api/chat.js` 自动成为 Serverless 函数（`/api/chat`）：
-   - 前端 `prompt` + 检索到的图谱 `context` → 服务端持钥调用智谱 `glm-4-flash` → 返回回答
-   - Key 永不下发浏览器；探索模式的路径规划自动升级为 AI 规划（带 🤖 徽标）
-   - **右下角 💬 AI 问答窗口同时生效**：即时问答、支持追问；本地/静态托管下接口不可达时，窗口内给出部署引导，不弹系统错误
-4. 同一仓库若部署在 GitHub Pages（纯静态），AI 探测失败会**自动回退**到内置规则引擎，功能不缺失
+2. **Settings → Environment Variables** 添加 `ZHIPU_API_KEY` → 重新部署
+3. `api/chat.js` 自动成为 Serverless 函数（`/api/chat`），与 `server.js` 同契约，前端无需改动
 
-> 本地调试 Serverless：`npm i -g vercel && vercel dev`（需先配置环境变量）。
+> 本地调试 Serverless：`npm i -g vercel && vercel dev`。
+
+### 方式三：GitHub Pages（纯静态，无 AI）
+`Settings → Pages → Source: Deploy from a branch → main / (root)`。
+AI 探测失败自动回退规则引擎——功能不缺失，只是没有 LLM 问答。
+
+> 两种后端实现共用同一份 `/api/chat` 契约（`{ prompt, context }` → `{ ok, answer }`），
+> 前端 `fetch('/api/chat')` 一行代码两边通吃。
 
 ## 🗂️ 目录结构
 
 ```
 aero-kg-learning/
 ├── index.html          # 单页应用（图谱 / AI 向导 / 关于 三视图）
-├── api/chat.js         # Vercel Serverless：智谱 glm-4-flash 代理（CORS / 密钥服务端保存）
+├── server.js           # ⭐ 零依赖单端口服务：静态页 + /api/chat 智谱代理（平台托管用）
+├── api/chat.js         # Vercel Serverless 版智谱代理（同契约，Vercel 部署用）
+├── package.json        # npm start → node server.js
 ├── css/style.css       # 浅色主题 + 响应式（≤900px 切抽屉）
 ├── js/
 │   ├── kg 数据见 data/；渲染见 graph.js；编排见 app.js

@@ -1,0 +1,15 @@
+{
+  "name": "aero-kg-learning",
+  "version": "1.0.0",
+  "private": true,
+  "description": "航空航天知识图谱学习向导 —— 静态站点 + /api/chat 智谱代理（单端口 Node 服务，零依赖）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

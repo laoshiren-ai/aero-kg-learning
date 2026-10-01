@@ -3,3 +3,8 @@ Thumbs.db
 *.log
 .node_modules/
 node_modules/
+
+# 服务端密钥文件（只留在本机与部署沙箱，绝不进 git / 不上传仓库）
+server-config.json
+.env
+.env.*

@@ -4,12 +4,12 @@
    提问链路（RAG）：
      ① 本地知识图谱检索：KG.search 关键词命中 + 一跳关系扩展
      ② 组装 context（概念·定义·书页出处·关系）
-     ③ POST /api/chat（Vercel Serverless 代理 → 智谱 glm-4-flash）
+     ③ POST /api/chat（本站 Node 服务端代理 → 智谱 glm-4-flash）
      ④ 回答渲染在对话框内，附「相关概念」chips 可点击跳转图谱
    降级：
-     本地预览 / 静态托管下接口不可达 → 对话框内给出部署引导，
-     不弹系统错误、不中断使用。
-   API Key 只存在服务端环境变量 ZHIPU_API_KEY，前端零密钥。
+     页面背后没有后端（如直接双击打开本地文件）时，
+     对话框内给出提示，不弹系统错误、不影响其余功能。
+   API Key 只存在服务端（环境变量或 server-config.json），前端零密钥。
    ═══════════════════════════════════════════════ */
 (function () {
   const ENDPOINT = '/api/chat';
@@ -198,10 +198,10 @@
   function friendlyError(err, status, data) {
     const hint = data && data.error ? String(data.error) : '';
     if (err && (err.name === 'TimeoutError' || err.name === 'AbortError')) return 'AI 响应超时了，请稍后重试。';
-    if (err instanceof TypeError) return '暂时连不上 AI 服务 —— 你现在可能是在本地或静态托管环境打开本页。把仓库部署到 Vercel（并在环境变量中配置 ZHIPU_API_KEY）后，这个窗口就是可用的即时问答台。';
-    if (status === 404) return '当前是静态托管，/api/chat 不存在。部署到 Vercel 并配置 ZHIPU_API_KEY 后即可使用 AI 问答。';
-    if (status === 500 && hint.includes('ZHIPU_API_KEY')) return '服务端还没有配置 ZHIPU_API_KEY：请到 Vercel → Settings → Environment Variables 添加后重新部署。';
-    if (hint.includes('401')) return '智谱 API Key 无效或已过期：请到智谱开放平台重新生成，并在 Vercel 更新 ZHIPU_API_KEY。';
+    if (err instanceof TypeError) return '连不上 AI 服务 —— 当前页面背后没有可用的后端（例如直接双击打开的本地文件）。用 `node server.js` 启动本站、或访问已发布的服务地址，即可正常问答。';
+    if (status === 404) return '当前页面没有 /api/chat 接口（看起来是纯静态托管）。请以 Node 服务方式运行本站，AI 问答才会生效。';
+    if (status === 500 && hint.includes('ZHIPU_API_KEY')) return '服务器还没配置 AI 密钥：请设置环境变量 ZHIPU_API_KEY，或在项目根目录创建 server-config.json 填入智谱 API Key。';
+    if (hint.includes('401')) return '智谱 API Key 无效或已过期：请到智谱开放平台重新生成后更新服务器配置。';
     if (status === 504) return 'AI 响应超时了，请稍后重试。';
     if (status === 413) return '问题太长了，请缩短后再试。';
     return 'AI 服务暂时不可用（' + (status || '网络异常') + '），请稍后重试。';

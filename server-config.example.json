@@ -1,0 +1,5 @@
+{
+  "_说明": "把本文件复制为 server-config.json（同目录），填入你的智谱 API Key。server-config.json 已在 .gitignore 中，不会被提交到仓库。",
+  "_获取Key": "https://open.bigmodel.cn → 右上角头像 → API Keys → 新建/复制",
+  "zhipuApiKey": "在此粘贴你的智谱 API Key"
+}
