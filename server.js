@@ -128,11 +128,19 @@ function sendFile(req, res, abs, buf) {
     }
   }
 
+  // 缓存策略：只有"基本不变"的资源长缓存（第三方库、图片、媒体）；
+  // 业务代码与数据（js/css/data/*）一律 no-cache —— 内容一更新浏览器立刻可见，
+  // 避免出现"改了 kg.js 用户却看到旧数据"的问题。
+  const seg0 = path.relative(ROOT, abs).split(path.sep)[0];
+  const immutable = seg0 === 'vendor' || seg0 === 'public' || isMedia;
+  const cacheCtl = (ext === '.html' || !immutable)
+    ? 'no-cache'
+    : 'public, max-age=604800, immutable';
   res.writeHead(200, {
     'Content-Type': type,
     'Content-Length': buf.length,
     'Accept-Ranges': isMedia ? 'bytes' : 'none',
-    'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+    'Cache-Control': cacheCtl,
     'X-Content-Type-Options': 'nosniff'
   });
   res.end(buf);
