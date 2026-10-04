@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="520" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">附面层 —— 壁面附近流速从 0 渐增的薄层</text>
+
+  <defs>
+    <marker id="wb" markerWidth="8" markerHeight="6" refX="6.5" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- 来流 -->
+  <line x1="60" y1="150" x2="150" y2="150" stroke="#2563eb" stroke-width="3.5" marker-end="url(#wb)"/>
+  <text x="62" y="132" font-size="16" fill="#2563eb" font-weight="600">外部气流 U∞</text>
+
+  <!-- 平板 -->
+  <rect x="150" y="336" width="700" height="10" fill="#334155"/>
+  <text x="500" y="376" text-anchor="middle" font-size="15" fill="#334155">物面（壁面）</text>
+
+  <!-- 附面层外包络（厚度沿程增长） -->
+  <path d="M150,336 C320,330 480,300 640,262 C710,244 780,228 850,220" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="742" y="212" font-size="15" fill="#64748b">附面层外边界 δ</text>
+
+  <!-- 层流段速度剖面（x=230 与 x=350） -->
+  <g stroke="#2563eb" stroke-width="2.5">
+    <line x1="230" y1="336" x2="248" y2="336"/>
+    <line x1="230" y1="322" x2="272" y2="322"/>
+    <line x1="230" y1="308" x2="286" y2="308"/>
+    <line x1="230" y1="294" x2="292" y2="294"/>
+    <line x1="230" y1="280" x2="294" y2="280"/>
+    <line x1="350" y1="336" x2="368" y2="336"/>
+    <line x1="350" y1="320" x2="392" y2="320"/>
+    <line x1="350" y1="304" x2="412" y2="304"/>
+    <line x1="350" y1="288" x2="422" y2="288"/>
+    <line x1="350" y1="272" x2="426" y2="272"/>
+  </g>
+  <text x="240" y="404" text-anchor="middle" font-size="16" fill="#2563eb" font-weight="600">层流附面层</text>
+  <text x="240" y="426" text-anchor="middle" font-size="13.5" fill="#64748b">流速剖面瘦而尖，摩擦阻力小</text>
+
+  <!-- 转捩 -->
+  <line x1="470" y1="240" x2="470" y2="346" stroke="#ea580c" stroke-width="3" stroke-dasharray="4 5"/>
+  <text x="470" y="222" text-anchor="middle" font-size="16" fill="#ea580c" font-weight="600">转捩</text>
+
+  <!-- 湍流段速度剖面（x=620 与 x=780）：饱满 -->
+  <g stroke="#7c3aed" stroke-width="2.5">
+    <line x1="620" y1="336" x2="638" y2="336"/>
+    <line x1="620" y1="324" x2="682" y2="324"/>
+    <line x1="620" y1="310" x2="700" y2="310"/>
+    <line x1="620" y1="294" x2="706" y2="294"/>
+    <line x1="620" y1="278" x2="710" y2="278"/>
+    <line x1="620" y1="262" x2="712" y2="262"/>
+    <line x1="780" y1="336" x2="798" y2="336"/>
+    <line x1="780" y1="322" x2="846" y2="322"/>
+    <line x1="780" y1="306" x2="862" y2="306"/>
+    <line x1="780" y1="290" x2="868" y2="290"/>
+    <line x1="780" y1="274" x2="872" y2="274"/>
+    <line x1="780" y1="258" x2="874" y2="258"/>
+  </g>
+  <text x="740" y="424" text-anchor="middle" font-size="16" fill="#7c3aed" font-weight="600">湍流附面层</text>
+  <text x="740" y="446" text-anchor="middle" font-size="13.5" fill="#64748b">剖面饱满、不易分离，但摩擦阻力更大</text>
+
+  <!-- 壁面粘附说明 -->
+  <text x="196" y="322" font-size="13" fill="#dc2626">u = 0（气流粘附于壁面）</text>
+
+  <!-- 结论 -->
+  <rect x="90" y="470" width="720" height="34" rx="8" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="450" y="493" text-anchor="middle" font-size="15.5" fill="#1d4ed8">摩擦阻力来自附面层内气流的黏性剪切；分离则产生压差阻力 —— 层流翼型靠推迟转捩减阻</text>
+</svg>

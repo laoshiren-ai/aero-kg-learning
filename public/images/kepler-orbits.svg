@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 580" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="580" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">开普勒定律 —— 椭圆轨道与面积速度</text>
+
+  <!-- 轨道椭圆：中心(430,280) rx=300 ry=170；焦点 (183,280) 与 (677,280)，太阳在右焦点 -->
+  <ellipse cx="430" cy="280" rx="300" ry="170" fill="none" stroke="#334155" stroke-width="3.5"/>
+
+  <!-- 等面积扇形：远日点侧（短弧大张角） -->
+  <path d="M677,280 L742,238 A84,84 0 0 1 742,322 Z" fill="#fde68a" opacity="0.85"/>
+  <!-- 近日点侧（长弧小张角） -->
+  <path d="M677,280 L150,262 A546,546 0 0 1 152,298 Z" fill="#fde68a" opacity="0.85"/>
+
+  <!-- 焦点标记 -->
+  <circle cx="677" cy="280" r="16" fill="#f59e0b"/>
+  <circle cx="677" cy="280" r="9" fill="#dc2626"/>
+  <text x="700" y="316" font-size="15" fill="#92400e">太阳（位于焦点）</text>
+  <circle cx="183" cy="280" r="4" fill="#94a3b8"/>
+  <text x="168" y="316" font-size="13" fill="#94a3b8">另一焦点（空）</text>
+
+  <!-- 长轴虚线 -->
+  <line x1="130" y1="280" x2="730" y2="280" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 5"/>
+
+  <!-- 行星：近日点（快） -->
+  <circle cx="130" cy="280" r="11" fill="#2563eb"/>
+  <line x1="130" y1="280" x2="130" y2="196" stroke="#2563eb" stroke-width="4" transform="translate(28,0)" opacity="0"/>
+  <line x1="130" y1="280" x2="146" y2="196" stroke="#2563eb" stroke-width="4"/>
+  <text x="176" y="190" font-size="14.5" fill="#2563eb" font-weight="600">近日点 · 速度最快</text>
+
+  <!-- 行星：远日点（慢） -->
+  <circle cx="730" cy="280" r="11" fill="#2563eb"/>
+  <line x1="730" y1="280" x2="722" y2="238" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="742" y="230" font-size="14.5" fill="#2563eb" font-weight="600">远日点 · 速度最慢</text>
+
+  <!-- 半长轴 a -->
+  <line x1="430" y1="280" x2="730" y2="280" stroke="#0f172a" stroke-width="0" />
+  <text x="548" y="300" font-size="14" fill="#64748b">半长轴 a</text>
+
+  <!-- 三定律 -->
+  <rect x="90" y="436" width="720" height="118" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="120" y="466" font-size="16" fill="#92400e" font-weight="600">第一定律：行星轨道是椭圆，太阳位于其中一个焦点上</text>
+  <text x="120" y="496" font-size="16" fill="#92400e" font-weight="600">第二定律：太阳与行星的连线在相等时间内扫过相等面积（黄域 A₁ = A₂）→ 近日点跑得快</text>
+  <text x="120" y="526" font-size="16" fill="#92400e" font-weight="600">第三定律：公转周期 T 的平方，与椭圆半长轴 a 的三次方成正比（T² ∝ a³）</text>
+</svg>

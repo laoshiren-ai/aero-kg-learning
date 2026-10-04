@@ -182,8 +182,10 @@
 
       const imgBlock = img
         ? `<figure class="media-fig">
-             <img class="zoomable" src="${esc(img)}" data-caption="${esc(cap)}" alt="${esc(cap)}" loading="lazy" draggable="false">
+             <img class="zoomable" src="${esc(img)}" data-caption="${esc(cap)}" alt="${esc(cap)}" loading="lazy" draggable="false"
+                  onerror="this.closest('figure').classList.add('img-missing');this.remove();if(window.AeroLightbox)AeroLightbox.refresh(document.body);">
              <span class="zoom-hint">🔍 点击放大</span>
+             <div class="media-ph media-ph-fallback"><span class="mi">🖼️</span><span>图片待补充<br><code>${esc(img)}</code></span></div>
              <figcaption>${esc(cap)}</figcaption>
            </figure>`
         : `<div class="media-ph"><span class="mi">🖼️</span>暂无图片</div>`;

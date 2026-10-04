@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="500" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">拉瓦尔喷管 —— 先收敛后扩张，连续加速到超声速</text>
+
+  <defs>
+    <marker id="lb" markerWidth="9" markerHeight="7" refX="7.5" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- 喷管型面 -->
+  <path d="M120,190 C260,190 340,232 450,232 C560,232 640,150 790,150" fill="none" stroke="#334155" stroke-width="5"/>
+  <path d="M120,330 C260,330 340,288 450,288 C560,288 640,370 790,370" fill="none" stroke="#334155" stroke-width="5"/>
+  <line x1="120" y1="190" x2="120" y2="330" stroke="#334155" stroke-width="4"/>
+  <line x1="790" y1="150" x2="790" y2="370" stroke="#334155" stroke-width="4"/>
+
+  <!-- 喉道虚线 -->
+  <line x1="450" y1="100" x2="450" y2="420" stroke="#94a3b8" stroke-width="2" stroke-dasharray="7 6"/>
+
+  <!-- 流速曲线（蓝，上）：收敛段缓升 → 喉道 M=1 → 扩张段陡升 -->
+  <polyline points="130,268 220,262 310,254 400,244 450,240 520,222 600,204 700,186 780,174"
+            fill="none" stroke="#2563eb" stroke-width="4"/>
+  <!-- 压强曲线（红，下）：收敛段缓降 → 喉道 → 扩张段陡降 -->
+  <polyline points="130,252 220,258 310,266 400,276 450,280 520,296 600,312 700,328 780,338"
+            fill="none" stroke="#dc2626" stroke-width="4" stroke-dasharray="10 5"/>
+
+  <!-- 流线与箭头 -->
+  <line x1="150" y1="260" x2="260" y2="260" stroke="#2563eb" stroke-width="3.5" marker-end="url(#lb)" opacity="0.55"/>
+  <line x1="500" y1="260" x2="640" y2="260" stroke="#2563eb" stroke-width="3.5" marker-end="url(#lb)" opacity="0.55"/>
+
+  <!-- 分区标注 -->
+  <text x="280" y="120" text-anchor="middle" font-size="18" fill="#334155" font-weight="600">收敛段</text>
+  <text x="280" y="145" text-anchor="middle" font-size="14" fill="#64748b">亚声速气流加速</text>
+  <text x="640" y="100" text-anchor="middle" font-size="18" fill="#334155" font-weight="600">扩张段</text>
+  <text x="640" y="125" text-anchor="middle" font-size="14" fill="#64748b">超声速气流继续加速</text>
+  <text x="450" y="86" text-anchor="middle" font-size="17" fill="#0f172a" font-weight="700">喉道 M = 1</text>
+
+  <!-- 图例 -->
+  <line x1="150" y1="408" x2="200" y2="408" stroke="#2563eb" stroke-width="4"/>
+  <text x="210" y="413" font-size="15" fill="#2563eb">气流速度 v</text>
+  <line x1="330" y1="408" x2="380" y2="408" stroke="#dc2626" stroke-width="4" stroke-dasharray="10 5"/>
+  <text x="390" y="413" font-size="15" fill="#dc2626">气体压强 p</text>
+
+  <!-- 结论 -->
+  <rect x="140" y="432" width="620" height="46" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="450" y="462" text-anchor="middle" font-size="16.5" fill="#1d4ed8">只有「先收敛、过喉道、再扩张」的管道，才能让气流从亚声速连续加速到超声速</text>
+</svg>

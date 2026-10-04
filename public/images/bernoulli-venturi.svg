@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="540" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">伯努利定理 —— 文丘里管实验</text>
+
+  <!-- 管壁 -->
+  <path d="M70,150 C230,150 300,235 450,235 C600,235 670,150 830,150" fill="none" stroke="#334155" stroke-width="5"/>
+  <path d="M70,370 C230,370 300,315 450,315 C600,315 670,370 830,370" fill="none" stroke="#334155" stroke-width="5"/>
+
+  <!-- 流线 -->
+  <path d="M70,208 C230,208 300,256 450,256 C600,256 670,208 830,208" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+  <path d="M70,243 C230,243 300,278 450,278 C600,278 670,243 830,243" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+  <path d="M70,278 C230,278 300,299 450,299 C600,299 670,278 830,278" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+
+  <!-- 流速箭头（蓝）：截面① 短 / 喉道 长 / 截面② 短 -->
+  <defs>
+    <marker id="ab" markerWidth="9" markerHeight="7" refX="7.5" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="7.5" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <line x1="95" y1="260" x2="165" y2="260" stroke="#2563eb" stroke-width="4" marker-end="url(#ab)"/>
+  <line x1="375" y1="275" x2="525" y2="275" stroke="#2563eb" stroke-width="4" marker-end="url(#ab)"/>
+  <line x1="735" y1="260" x2="805" y2="260" stroke="#2563eb" stroke-width="4" marker-end="url(#ab)"/>
+
+  <!-- 压强箭头（红）：截面① 大 / 喉道 小 -->
+  <line x1="120" y1="92" x2="120" y2="142" stroke="#dc2626" stroke-width="4" marker-end="url(#ar)"/>
+  <line x1="120" y1="428" x2="120" y2="378" stroke="#dc2626" stroke-width="4" marker-end="url(#ar)"/>
+  <line x1="450" y1="196" x2="450" y2="228" stroke="#dc2626" stroke-width="2.5" marker-end="url(#ar)"/>
+  <line x1="450" y1="398" x2="450" y2="366" stroke="#dc2626" stroke-width="2.5" marker-end="url(#ar)"/>
+
+  <!-- 站位标注 -->
+  <text x="120" y="72" text-anchor="middle" font-size="18" fill="#334155" font-weight="600">截面 ①（管粗）</text>
+  <text x="120" y="96" text-anchor="middle" font-size="15" fill="#64748b">流速小 · 压强大</text>
+  <text x="450" y="52" text-anchor="middle" font-size="18" fill="#334155" font-weight="600">喉道（管细）</text>
+  <text x="450" y="176" text-anchor="middle" font-size="15" fill="#dc2626">压强小</text>
+  <text x="450" y="176" text-anchor="middle" font-size="15" fill="#dc2626" dy="0" opacity="0"/>
+  <text x="782" y="72" text-anchor="middle" font-size="18" fill="#334155" font-weight="600">截面 ②</text>
+
+  <!-- 结论区 -->
+  <rect x="120" y="446" width="660" height="70" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="450" y="475" text-anchor="middle" font-size="19" fill="#1d4ed8" font-weight="600">p + ½ρv² = 常数（沿同一流线）</text>
+  <text x="450" y="503" text-anchor="middle" font-size="16" fill="#334155">同一流管中：流速越大 → 压强越小；流速越小 → 压强越大</text>
+</svg>

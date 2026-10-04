@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="540" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">跨声速翼型上的局部激波与波阻</text>
+
+  <defs>
+    <marker id="sb" markerWidth="9" markerHeight="7" refX="7.5" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#334155"/>
+    </marker>
+    <marker id="sr" markerWidth="9" markerHeight="7" refX="7.5" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <!-- 来流 -->
+  <line x1="70" y1="200" x2="150" y2="200" stroke="#334155" stroke-width="3.5" marker-end="url(#sb)"/>
+  <line x1="70" y1="300" x2="150" y2="300" stroke="#334155" stroke-width="3.5" marker-end="url(#sb)"/>
+  <text x="72" y="180" font-size="16" fill="#334155" font-weight="600">来流 Ma ≈ 0.9</text>
+
+  <!-- 翼型（弦长 400，位于中部） -->
+  <path d="M250,262 C330,206 520,204 650,252 C560,290 380,300 250,262 Z"
+        fill="#dbeafe" stroke="#1e40af" stroke-width="3.5"/>
+
+  <!-- 局部超声速区（音速线 + 激波围成） -->
+  <path d="M330,224 C390,196 480,196 545,222 C490,214 400,214 330,224 Z"
+        fill="#fee2e2" opacity="0.85"/>
+  <path d="M330,224 C400,214 490,214 545,222" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <text x="430" y="188" text-anchor="middle" font-size="15" fill="#b45309">音速线（M = 1）</text>
+
+  <!-- 激波（红色粗线，近似正激波略后倾） -->
+  <line x1="545" y1="204" x2="570" y2="266" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/>
+  <text x="620" y="160" text-anchor="middle" font-size="18" fill="#dc2626" font-weight="700">正激波</text>
+  <line x1="592" y1="176" x2="562" y2="212" stroke="#dc2626" stroke-width="2"/>
+
+  <!-- 波后减速箭头 -->
+  <line x1="590" y1="240" x2="660" y2="248" stroke="#dc2626" stroke-width="3" marker-end="url(#sr)" opacity="0.7"/>
+  <text x="700" y="252" font-size="14" fill="#dc2626">波后 M &lt; 1</text>
+
+  <!-- 激波根部干扰 -->
+  <circle cx="566" cy="268" r="14" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+  <text x="600" y="322" font-size="15" fill="#7c3aed">激波根部与附面层干扰，</text>
+  <text x="600" y="344" font-size="15" fill="#7c3aed">常引发气流分离</text>
+
+  <!-- 注释框 -->
+  <rect x="90" y="398" width="720" height="104" rx="10" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="450" y="428" text-anchor="middle" font-size="17" fill="#991b1b" font-weight="600">Ma∞ 超过临界马赫数后：上翼面出现局部超声速区 → 以正激波结束</text>
+  <text x="450" y="456" text-anchor="middle" font-size="16" fill="#7f1d1d">激波前后压强突升，压差阻力急剧增大 —— 这就是「激波阻力（波阻）」的主要来源</text>
+  <text x="450" y="484" text-anchor="middle" font-size="15" fill="#991b1b">对策：后掠机翼、薄翼型、跨声速面积律，都能推迟 / 减弱激波</text>
+</svg>

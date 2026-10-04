@@ -851,6 +851,12 @@ input { font-family: inherit; }
   background: #000; border-radius: 0;
 }
 
+/* 图片缺失兜底：img 加载失败后显示占位 + 期待路径 */
+.media-ph-fallback { display: none; margin: 0; min-height: 90px; }
+.media-fig.img-missing .media-ph-fallback { display: flex; }
+.media-fig.img-missing .zoom-hint { display: none; }
+.media-ph-fallback code { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 1px 6px; border-radius: 4px; }
+
 /* ═══════════ 全局图片放大查看器（AeroLightbox） ═══════════ */
 .alb-overlay {
   position: fixed; inset: 0; z-index: 400; display: none;

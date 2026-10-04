@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="460" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">冲压喷气发动机 —— 靠高速来流自身压缩</text>
+
+  <defs>
+    <marker id="rb" markerWidth="8" markerHeight="6" refX="6.5" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- 壳体 -->
+  <path d="M120,170 H720 M120,330 H720" stroke="#334155" stroke-width="4"/>
+  <!-- 尖锥进气道 -->
+  <path d="M120,170 C170,210 220,236 300,244 M120,330 C170,290 220,264 300,256" stroke="#334155" stroke-width="4" fill="none"/>
+  <path d="M80,250 L300,244 L300,256 Z" fill="#64748b"/>
+  <!-- 斜激波 -->
+  <line x1="90" y1="246" x2="230" y2="150" stroke="#dc2626" stroke-width="2.5"/>
+  <line x1="90" y1="254" x2="230" y2="350" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="188" y="136" font-size="14" fill="#dc2626">斜激波减速增压</text>
+
+  <!-- 燃烧室火焰 -->
+  <path d="M380,250 C390,228 418,228 428,246 C438,228 466,228 476,250 C466,272 438,274 428,258 C418,276 390,274 380,250 Z" fill="#f97316"/>
+  <text x="428" y="304" text-anchor="middle" font-size="14" fill="#ea580c">燃油喷入 · 稳定燃烧</text>
+
+  <!-- 收敛喷管 -->
+  <path d="M660,170 C690,206 706,232 740,246 M660,330 C690,294 706,268 740,254" stroke="#334155" stroke-width="4" fill="none"/>
+
+  <!-- 来流与排气 -->
+  <line x1="30" y1="250" x2="80" y2="250" stroke="#2563eb" stroke-width="4" marker-end="url(#rb)"/>
+  <text x="28" y="228" font-size="14" fill="#2563eb" font-weight="600">Ma ≥ 2 来流</text>
+  <line x1="750" y1="250" x2="850" y2="250" stroke="#ea580c" stroke-width="4" marker-end="url(#rb)"/>
+  <text x="758" y="228" font-size="14" fill="#ea580c" font-weight="600">高速燃气</text>
+
+  <!-- 分区标签 -->
+  <g font-size="16.5" font-weight="600" fill="#0f172a" text-anchor="middle">
+    <text x="210" y="390">进气道（扩压）</text>
+    <text x="440" y="390">燃烧室</text>
+    <text x="700" y="390">尾喷管</text>
+  </g>
+  <g font-size="13.5" fill="#64748b" text-anchor="middle">
+    <text x="210" y="412">激波 + 扩压通道减速增压</text>
+    <text x="440" y="412">等压加热</text>
+    <text x="700" y="412">喷气产生推力</text>
+  </g>
+
+  <rect x="140" y="126" width="0" height="0"/>
+  <rect x="120" y="120" width="0" height="0"/>
+  <text x="450" y="88" text-anchor="middle" font-size="15.5" fill="#64748b">没有压气机和涡轮 —— 结构简单、Ma 3 以上性能好，但必须被加速后才能点火工作</text>
+</svg>

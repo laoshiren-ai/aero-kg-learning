@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="'Noto Sans SC','Microsoft YaHei',sans-serif">
+  <rect width="900" height="560" fill="#f8fafc"/>
+  <text x="450" y="46" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">固体火箭发动机 —— 药柱即燃烧室</text>
+
+  <!-- 壳体 -->
+  <path d="M120,160 H600" stroke="#334155" stroke-width="8" fill="none"/>
+  <path d="M120,400 H600" stroke="#334155" stroke-width="8" fill="none"/>
+  <path d="M120,160 C88,180 88,380 120,400" stroke="#334155" stroke-width="8" fill="none"/>
+  <text x="300" y="140" text-anchor="middle" font-size="16" fill="#334155" font-weight="600">壳体（兼作燃烧室）</text>
+  <line x1="300" y1="150" x2="300" y2="172" stroke="#94a3b8" stroke-width="1.5"/>
+
+  <!-- 药柱 -->
+  <path d="M130,168 C100,188 100,372 130,392 L590,392 C620,372 620,188 590,168 Z"
+        fill="#fcd34d" opacity="0.9"/>
+  <!-- 内孔通道 -->
+  <path d="M135,208 L560,208 M135,352 L560,352" stroke="#f8fafc" stroke-width="0"/>
+  <path d="M140,258 H560 M140,302 H560" stroke="#f8fafc" stroke-width="0"/>
+  <path d="M138,168 C108,190 108,370 138,392 L590,392 C620,370 620,188 590,168 Z"
+        fill="#fbbf24"/>
+  <!-- 内孔（星形近似为长通道） -->
+  <rect x="150" y="248" width="440" height="64" rx="30" fill="#f8fafc"/>
+
+  <!-- 点火器 -->
+  <rect x="86" y="252" width="40" height="56" rx="8" fill="#f59e0b" stroke="#92400e" stroke-width="2"/>
+  <text x="80" y="234" font-size="15" fill="#92400e" font-weight="600">点火器</text>
+
+  <!-- 燃气流动箭头 -->
+  <defs>
+    <marker id="go" markerWidth="8" markerHeight="6" refX="6.5" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#ea580c"/>
+    </marker>
+  </defs>
+  <line x1="200" y1="280" x2="300" y2="280" stroke="#ea580c" stroke-width="3.5" marker-end="url(#go)"/>
+  <line x1="340" y1="280" x2="440" y2="280" stroke="#ea580c" stroke-width="4" marker-end="url(#go)"/>
+  <line x1="480" y1="280" x2="580" y2="280" stroke="#ea580c" stroke-width="5" marker-end="url(#go)"/>
+
+  <!-- 喷管 -->
+  <path d="M600,160 C660,196 700,224 780,240 M600,400 C660,364 700,336 780,320" stroke="#334155" stroke-width="8" fill="none"/>
+  <path d="M700,280 L850,280" stroke="none"/>
+  <path d="M760,240 C800,254 820,264 870,270 M760,320 C800,306 820,296 870,290" stroke="#334155" stroke-width="8" fill="none"/>
+  <path d="M600,168 C640,200 680,230 762,244 M600,392 C640,360 680,330 762,316" stroke="#f97316" stroke-width="3" opacity="0.5" fill="none"/>
+  <text x="700" y="446" text-anchor="middle" font-size="16" fill="#334155" font-weight="600">喷管（拉瓦尔型）</text>
+
+  <!-- 排气羽流 -->
+  <path d="M872,258 C910,266 920,274 940,280 C920,286 910,294 872,302 C896,286 896,274 872,258 Z" fill="#f97316"/>
+  <text x="884" y="244" text-anchor="middle" font-size="14" fill="#ea580c">燃气</text>
+
+  <!-- 内孔燃烧标注 -->
+  <text x="360" y="236" text-anchor="middle" font-size="15" fill="#92400e" font-weight="600">药柱内孔燃烧：由内向外，燃面退移</text>
+
+  <!-- 药柱截面 inset -->
+  <rect x="620" y="80" width="256" height="60" rx="8" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="748" y="106" text-anchor="middle" font-size="13.5" fill="#92400e">星形装药 → 推力平稳</text>
+  <text x="748" y="128" text-anchor="middle" font-size="13.5" fill="#92400e">管状装药 → 结构最简单</text>
+
+  <!-- 特点说明 -->
+  <rect x="90" y="478" width="720" height="58" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="450" y="502" text-anchor="middle" font-size="16" fill="#92400e" font-weight="600">推进剂预先浇注在壳体内：结构简单、可靠、可长期贮存，随时待发</text>
+  <text x="450" y="526" text-anchor="middle" font-size="14.5" fill="#b45309">缺点：点燃后一般无法中途关机；多用于助推器与导弹</text>
+</svg>
