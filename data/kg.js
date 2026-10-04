@@ -80,7 +80,7 @@ window.AeroKG = {
     { id: 'space_env', name: '空间环境', category: 'environ', ch: 2, evidence: '书页66-67',
       definition: '真空、电磁辐射、高能粒子辐射、等离子体和微流星体等形成的飞行环境，是航天器飞行的主要环境。',
       detail: '包括地球空间环境（高层大气、电离层、磁层）、行星际空间环境和恒星际空间环境。' },
-    { id: 'ionosphere', imageUrl: '/images/photo-ionosphere.jpg', imageCaption: '极光实拍照片（电离层现象）', name: '电离层', category: 'environ', ch: 2, evidence: '书页66',
+    { id: 'ionosphere', imageUrl: '/images/photo-ionosphere.png', imageCaption: '极光实拍：太阳带电粒子激发高层大气（约 100km 高度）', name: '电离层', category: 'environ', ch: 2, evidence: '书页66',
       definition: '离地表60～1000km范围内，大气原子在太阳辐射作用下电离成自由电子和正离子的区域，电子浓度随高度、昼夜、季节、纬度和太阳活动变化。' },
     { id: 'magnetosphere', name: '磁层与辐射带', category: 'environ', ch: 2, evidence: '书页66',
       definition: '地球磁场从600～1000km高度向远处延伸形成的区域，其中的高能带电粒子辐射带又称"范爱伦辐射带"，可能引起航天器材料和航天员的辐射损伤。' },
@@ -213,10 +213,10 @@ window.AeroKG = {
     { id: 'aspect_ratio', name: '展弦比', category: 'wing', ch: 2, evidence: '书页89-90、93',
       definition: '机翼展长与平均几何弦长之比 λ = l²/S。',
       detail: '低速飞机展弦比大（一般6～9）以减小诱导阻力；超声速飞机展弦比小（一般2.5～3.5）以缩短激波面长度、减小波阻。' },
-    { id: 'swept_wing', imageUrl: '/images/photo-swept_wing.jpg', imageCaption: '后掠翼战机实拍照片', name: '后掠机翼', category: 'wing', ch: 2, evidence: '书页91-92',
+    { id: 'swept_wing', imageUrl: '/images/photo-swept_wing.png', imageCaption: '「狂风」战斗机实拍：后掠翼（该机机翼后掠角还可变）', name: '后掠机翼', category: 'wing', ch: 2, evidence: '书页91-92',
       definition: '前缘向后倾斜的机翼。只有垂直于前缘的气流分量产生升力，有效速度减小，从而提高Ma临界、推迟局部激波、减小波阻。',
       detail: '现代超声速飞机后掠角一般在30°～60°。缺点是翼尖先失速并快速扩展，常加装翼刀、前缘锯齿来阻止气流沿翼展方向流动。' },
-    { id: 'delta_wing', imageUrl: '/images/photo-delta_wing.jpg', imageCaption: '三角翼战机实拍照片', name: '三角形机翼', category: 'wing', ch: 2, evidence: '书页93',
+    { id: 'delta_wing', imageUrl: '/images/photo-delta_wing.png', imageCaption: 'XF-92A 实拍：三角翼的先驱验证机', name: '三角形机翼', category: 'wing', ch: 2, evidence: '书页93',
       definition: '平面形状呈三角形的机翼，前缘后掠角大、展弦比小、相对厚度小，减阻效果与大后掠翼相似且根部结构受力好。',
       detail: '焦点位置从跨声速到超声速变化小，有利于纵向稳定性；但亚声速升阻比较低、着陆性能较差。歼-8Ⅱ等超声速飞机采用。' },
     { id: 'variable_sweep', name: '变后掠机翼', category: 'wing', ch: 2, evidence: '书页93-94',
@@ -225,7 +225,7 @@ window.AeroKG = {
     { id: 'strake_wing', name: '边条机翼', category: 'wing', ch: 2, evidence: '书页94-95',
       definition: '由大后掠角细长边条（前翼）和中等展弦比三角基本翼（后翼）组成的混合平面形状机翼。',
       detail: '边条产生的前缘涡流过基本翼上表面产生有利的干扰（涡升力），既减小激波阻力又增大升阻比。F-16、F-18、米格-29等高机动战斗机采用。' },
-    { id: 'canard', imageUrl: '/images/photo-canard.jpg', imageCaption: '鸭式布局战机实拍照片（歼-10）', name: '鸭式布局', category: 'wing', ch: 2, evidence: '书页95',
+    { id: 'canard', imageUrl: '/images/photo-canard.png', imageCaption: '歼-10 实拍：鸭式布局，鸭翼产生正升力并增强机动性', name: '鸭式布局', category: 'wing', ch: 2, evidence: '书页95',
       definition: '将水平尾翼移到机翼之前（称前翼或鸭翼）的布局。正迎角飞行时鸭翼产生正升力，对全机升力有积极贡献。',
       detail: '鸭翼气流流向机翼上表面时产生类似边条翼的有利干扰，改善起降性能。瑞典Saab JA-37采用鸭式布局，起降距离仅为同类飞机的一半左右。' },
     { id: 'tailless', name: '无尾式布局', category: 'wing', ch: 2, evidence: '书页95-96',
@@ -239,7 +239,7 @@ window.AeroKG = {
       detail: 'YF-102飞机未采用面积律时跨声速波阻很大，改用蜂腰形机身后才顺利跨过声速。' },
 
     // ── 试验研究 ──
-    { id: 'wind_tunnel', imageUrl: '/images/photo-wind_tunnel.jpg', imageCaption: '风洞试验段实拍照片', name: '风洞', category: 'test', ch: 2, evidence: '书页98-100',
+    { id: 'wind_tunnel', imageUrl: '/images/photo-wind_tunnel.png', imageCaption: 'NASA 全尺寸风洞中的 X-48B 缩比验证机试验', name: '风洞', category: 'test', ch: 2, evidence: '书页98-100',
       definition: '利用人造气流进行飞机空气动力实验的设备，是相对运动原理的典型应用。',
       detail: '实验须保证模型与真飞机"几何相似、运动相似、动力相似"。风洞可测升力系数、阻力系数和升阻比随迎角变化的曲线，确定临界迎角、最有利飞行状态等。' },
     { id: 'reynolds', name: '雷诺数', category: 'test', ch: 2, evidence: '书页98',
@@ -304,7 +304,7 @@ window.AeroKG = {
       definition: '垂直尾翼后缘的操纵面。蹬左脚蹬→方向舵左偏→垂尾产生向右附加侧力→机头向左偏转。' },
 
     // ── 直升机 ──
-    { id: 'heli_principle', imageUrl: '/images/photo-heli_principle.jpg', imageCaption: '直升机飞行实拍照片', name: '直升机飞行原理', category: 'heli', ch: 2, evidence: '书页113-114',
+    { id: 'heli_principle', imageUrl: '/images/photo-heli_principle.png', imageCaption: '罗宾逊 R44 直升机实拍：旋翼 + 尾桨布局', name: '直升机飞行原理', category: 'heli', ch: 2, evidence: '书页113-114',
       definition: '直升机靠旋翼旋转与空气相互作用产生空气动力（拉力），既能垂直起降、空中悬停，又能沿任意方向飞行。',
       detail: '与固定翼飞机相比，直升机速度慢（巡航250～350km/h）、航程短、飞行高度低、振动噪声较大；但能垂直起降、对场地要求低、能悬停，应用非常广泛。' },
     { id: 'rotor', name: '旋翼', category: 'heli', ch: 2, evidence: '书页114',
@@ -337,7 +337,7 @@ window.AeroKG = {
       detail: '这正是火箭发动机存在的根本理由：涡轮喷气发动机最大只能到3倍声速左右，超燃冲压试验不到10倍声速，航空发动机根本满足不了航天要求。' },
     { id: 'launch_orbit', name: '发射与入轨', category: 'space', ch: 2, evidence: '书页119、128（目录）',
       definition: '航天器由运载火箭发射升空进入运行轨道的阶段。（本图谱第2章此节为延伸位，细节待扩展。）' },
-    { id: 'reentry', imageUrl: '/images/photo-reentry.jpg', imageCaption: '航天器再入 / 返回舱实拍照片', name: '返回与再入', category: 'space', ch: 2, evidence: '书页119、130（目录）',
+    { id: 'reentry', imageUrl: '/images/photo-reentry.png', imageCaption: '神舟飞船返回舱实拍：再入烧蚀痕迹清晰可见', name: '返回与再入', category: 'space', ch: 2, evidence: '书页119、130（目录）',
       definition: '航天器脱离运行轨道、再入大气层并安全着陆回收的阶段。再入时速度极高、表面温度可达数千度，需解决热防护问题。（延伸位）' },
     { id: 'attitude_ctrl', name: '姿态稳定与控制', category: 'space', ch: 2, evidence: '书页119、131（目录）',
       definition: '保持或按需要改变航天器在空间姿态的技术。（延伸位）' },
@@ -355,7 +355,7 @@ window.AeroKG = {
     { id: 'four_stroke', imageUrl: '/images/four-stroke.svg', imageCaption: '四冲程工作原理：进气 → 压缩 → 做功 → 排气', name: '四冲程工作原理', category: 'engine', ch: 3, evidence: '书页137-138',
       definition: '活塞发动机的每一个工作循环包括四个行程：进气行程（吸入混合气）、压缩行程（压缩并点火）、膨胀行程（燃气推动活塞做功）、排气行程（排出废气）。',
       detail: '多个气缸组合工作带动曲轴和螺旋桨。冷却方式有液冷式（直线或V形排列）和气冷式（星形排列，气缸外有散热片）。' },
-    { id: 'propeller', imageUrl: '/images/photo-propeller.jpg', imageCaption: '螺旋桨实拍照片', name: '螺旋桨', category: 'engine', ch: 3, evidence: '书页136、146-147',
+    { id: 'propeller', imageUrl: '/images/photo-propeller.png', imageCaption: '涡桨发动机与螺旋桨实拍：桨叶有扭转角，桨尖划出螺旋轨迹', name: '螺旋桨', category: 'engine', ch: 3, evidence: '书页136、146-147',
       definition: '由发动机带动高速旋转、使空气加速向后流动从而获得反作用拉力的部件。',
       detail: '飞行速度接近声速时桨叶叶尖速度超过声速，产生激波和激波阻力，螺旋桨效率急剧降低——这是活塞式/涡轮螺桨飞机不适于高速飞行的根本原因。' },
     { id: 'air_breathing', name: '空气喷气发动机', category: 'engine', ch: 3, evidence: '书页136、140',
@@ -402,7 +402,7 @@ window.AeroKG = {
     { id: 'ab_turbofan', name: '加力涡扇发动机', category: 'engine', ch: 3, evidence: '书页148-149',
       definition: '涵道比小于1、带加力燃烧室的涡轮风扇发动机，广泛应用于第三代战斗机。',
       detail: '两大突出优点：①加力比大——地面静止加力比可达1.7，超声速飞行时受冲压影响加力比可达3以上，大大改善加速性能；②经济性好——超声速和亚声速巡航耗油率都比较低。' },
-    { id: 'thrust_vector', imageUrl: '/images/photo-thrust_vector.jpg', imageCaption: '矢量喷管实拍照片', name: '推力矢量技术', category: 'combo', ch: 3, evidence: '书页149-150',
+    { id: 'thrust_vector', imageUrl: '/images/photo-thrust_vector.png', imageCaption: '尾喷管偏转三状态：巡航 / 短距起降（45°）/ 垂直起降（90°）', name: '推力矢量技术', category: 'combo', ch: 3, evidence: '书页149-150',
       definition: '通过改变发动机喷口气流方向提供俯仰/偏航操纵力矩的技术，是第四代战斗机（4S能力）的重要技术特征。',
       detail: '喷口形式：折流板（X-31）、二元推力矢量喷管（F-22的F119发动机）、轴对称全向推力矢量喷管（Su-37的AL-37FU）。可使飞机在低速大迎角、舵面几近失效的条件下完成超机动飞行。' },
     { id: 'propfan', name: '涡轮桨扇发动机', category: 'engine', ch: 3, evidence: '书页150-151',
@@ -460,7 +460,7 @@ window.AeroKG = {
     { id: 'hybrid_rocket', name: '固液混合火箭发动机', category: 'rocket', ch: 3, evidence: '书页165-166',
       definition: '使用固体组元+液体组元组合推进剂的火箭发动机，多采用固体燃烧剂+液体氧化剂。',
       detail: '综合了固体和液体火箭发动机的优点：比冲与液体相近而比固体高得多，平均密度比液体高；结构比液体简单；通过调节液体组元流量可方便地实现多次启动、关车和推力调节。' },
-    { id: 'electric_prop', imageUrl: '/images/photo-electric_prop.jpg', imageCaption: '电推进（霍尔推力器）实拍照片', name: '电推进系统', category: 'combo', ch: 3, evidence: '书页166-168',
+    { id: 'electric_prop', imageUrl: '/images/photo-electric_prop.png', imageCaption: '霍尔推力器点火实拍：蓝色羽流为氙离子束', name: '电推进系统', category: 'combo', ch: 3, evidence: '书页166-168',
       definition: '利用电能加速工质形成高速射流产生推力的推进系统（电火箭发动机）。能源与工质分开，工质一般为氢、氮、氩、氙等。',
       detail: '比冲高达3000～250000m/s，远超化学推进（2500～5000），可大幅增加航天器有效载荷；但推力很小，且需要航天器提供充分电能。按原理分：电热推进（电弧加热比冲6000～16000）、电磁推进（等离子体，比冲50000～250000，用于姿态控制/位置保持/星际航行）、静电推进（离子发动机，工质氙）。' },
     { id: 'nuclear_prop', name: '核火箭发动机', category: 'combo', ch: 3, evidence: '书页168',
@@ -482,7 +482,7 @@ window.AeroKG = {
       definition: '火箭发动机与涡轮喷气发动机的组合：液体火箭燃气发生器驱动涡轮，涡轮带动压气机给空气增压。可认为是涡喷发动机的变型。' },
 
     // ── 交叉关联节点 ──
-    { id: 'stealth', imageUrl: '/images/photo-stealth.jpg', imageCaption: '隐身战斗机实拍照片（F-22 / 歼-20）', name: '隐身能力', category: 'combo', ch: 2, evidence: '书页96、149',
+    { id: 'stealth', imageUrl: '/images/photo-stealth.png', imageCaption: 'F-22「猛禽」实拍：隐身外形与平行边缘设计', name: '隐身能力', category: 'combo', ch: 2, evidence: '书页96、149',
       definition: '减少雷达等探测器可探测特征的飞机能力。隐身飞机通常采用无立尾/V形尾翼布局增加隐身能力；第四代战斗机要求隐身+超声速巡航+过失速机动+超视距攻击（4S）。' }
   ],
 
