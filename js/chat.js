@@ -83,7 +83,7 @@
 
   function scrollBottom() { msgsBox.scrollTop = msgsBox.scrollHeight; }
 
-  function addMsg(role, text, hits, isError) {
+  function addMsg(role, text, hits, isError, opts) {
     const wrap = document.createElement('div');
     wrap.className = 'msg msg-' + role + (isError ? ' error' : '');
     let html = '<div class="msg-text">' + rich(text) + '</div>';
@@ -92,6 +92,10 @@
         hits.slice(0, 4).map(n => '<span class="msg-chip" data-id="' + esc(n.id) + '">' + esc(n.name) + '</span>').join('') +
         '</div>';
     }
+    // AI 回答 → 一键存为笔记（可再到笔记本里拆成复习卡片）
+    if (role === 'ai' && opts && opts.savePayload) {
+      html += '<div class="msg-actions"><button class="msg-save" type="button">💾 存为笔记</button></div>';
+    }
     wrap.innerHTML = html;
     wrap.querySelectorAll('.msg-chip').forEach(el =>
       el.addEventListener('click', () => {
@@ -99,6 +103,20 @@
         if (window.matchMedia('(max-width: 900px)').matches) panel.classList.remove('open');
         if (window.App) App.openNode(el.dataset.id, { fromSearch: true });
       }));
+    const saveBtn = wrap.querySelector('.msg-save');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        saveBtn.disabled = true; saveBtn.textContent = '保存中…';
+        try {
+          const res = await window.AeroAPI.createNote(opts.savePayload);
+          saveBtn.textContent = '✓ 已存为笔记';
+          if (window.AeroNotes && AeroNotes.onSaved) AeroNotes.onSaved(res.note);
+        } catch (e) {
+          saveBtn.disabled = false; saveBtn.textContent = '💾 存为笔记';
+          alert('保存失败：' + ((e && e.message) || '未知错误'));
+        }
+      });
+    }
     msgsBox.appendChild(wrap);
     scrollBottom();
   }
@@ -175,7 +193,15 @@
       if (!res.ok) throw Object.assign(new Error('http_' + res.status), { __status: res.status, __data: data });
       const answer = data && data.answer;
       if (!answer) throw Object.assign(new Error('empty_answer'), { __status: 502 });
-      addMsg('ai', answer, ret.topHits);
+      addMsg('ai', answer, ret.topHits, false, {
+        savePayload: {
+          title: q.length > 24 ? q.slice(0, 24) + '…' : q,
+          content: '【问题】\n' + q + '\n\n【AI 回答】\n' + answer + '\n\n（来自站内 AI 问答，依据《航空航天概论》知识图谱生成）',
+          source_type: 'chat',
+          source_id: (ret.topHits && ret.topHits[0]) ? ret.topHits[0].id : '',
+          tags: (ret.topHits || []).slice(0, 3).map(n => n.name)
+        }
+      });
       history.push({ q: q, a: answer });
       if (history.length > KEEP_TURNS) history.shift();
     } catch (err) {

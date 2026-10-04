@@ -30,6 +30,8 @@
     <nav class="topnav">
       <button class="nav-btn active" data-view="graph">知识图谱</button>
       <button class="nav-btn" data-view="guide">AI 学习向导</button>
+      <button class="nav-btn" data-view="notes">笔记本</button>
+      <button class="nav-btn" data-view="review">复习<span class="nav-badge" id="navDueBadge" style="display:none"></span></button>
       <button class="nav-btn" data-view="about">关于</button>
     </nav>
   </div>
@@ -98,6 +100,7 @@
         <div class="guide-card">
           <h3>🗺️ 我的知识地图</h3>
           <div class="map-summary" id="mapSummary"></div>
+          <div class="trail-toolbar" id="trailToolbar"></div>
           <div class="trail-list" id="trailList"></div>
           <button id="btnClearTrail" class="btn-ghost btn-sm">清空足迹</button>
         </div>
@@ -109,7 +112,28 @@
     </div>
   </section>
 
-  <!-- 视图3: 关于 -->
+  <!-- 视图3: 笔记本 -->
+  <section class="view view-notes" id="view-notes">
+    <div class="notes-wrap">
+      <aside class="notes-side">
+        <div class="notes-side-head">
+          <b>📒 笔记本</b>
+          <button id="btnNewNote" class="btn-primary btn-sm">+ 新建</button>
+        </div>
+        <input id="noteSearch" class="notes-search" type="text" placeholder="搜索标题 / 标签 / 内容…" autocomplete="off">
+        <div class="notes-list" id="notesList"></div>
+        <div class="notes-side-foot" id="notesSideFoot"></div>
+      </aside>
+      <section class="notes-main" id="notesMain"></section>
+    </div>
+  </section>
+
+  <!-- 视图4: 复习 -->
+  <section class="view view-review" id="view-review">
+    <div class="review-wrap" id="reviewMain"></div>
+  </section>
+
+  <!-- 视图5: 关于 -->
   <section class="view view-about" id="view-about">
     <div class="about-wrap">
       <div class="guide-card">
@@ -146,16 +170,23 @@
 
 <footer class="footbar">
   <span>数据源：《航空航天概论》第3版 · 贾玉红主编</span>
-  <span id="footStats"></span>
+  <span class="foot-right"><span id="footMode" class="foot-mode"></span><span id="footStats"></span></span>
 </footer>
 
 <script src="vendor/echarts.min.js"></script>
+<script src="vendor/mermaid.min.js"></script>
 <script src="data/kg.js"></script>
 <script src="data/paths.js"></script>
+<script src="js/user.js"></script>
+<script src="js/api.js"></script>
 <script src="js/retrieve.js"></script>
 <script src="js/guide.js"></script>
 <script src="js/search.js"></script>
 <script src="js/graph.js"></script>
+<script src="js/mermaid-view.js"></script>
+<script src="js/summary.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/review.js"></script>
 <script src="js/app.js"></script>
 <script src="js/chat.js"></script>
 </body>

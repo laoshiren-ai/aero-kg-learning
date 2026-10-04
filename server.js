@@ -4,48 +4,62 @@
  * ───────────────────────────────────────────────────────────
  * 一个进程同时干两件事：
  *   ① 静态托管本站（index.html / js / css / data / vendor）
- *   ② POST /api/chat —— 智谱 glm-4-flash 代理（前端不接触 API Key）
+ *   ② 提供 /api/* 接口（AI 代理 + 笔记 / 卡片复习）
+ *
+ * 接口一览
+ *   POST   /api/chat                    智谱代理（即时问答 / AI 学习路径）
+ *   POST   /api/summarize/keywords       多关键词 AI 综述 + Mermaid 关系图
+ *   GET    /api/notes                    笔记列表
+ *   POST   /api/notes                    新建笔记
+ *   GET    /api/notes/:id                笔记详情
+ *   PUT    /api/notes/:id                编辑笔记
+ *   DELETE /api/notes/:id                删除笔记
+ *   GET    /api/notes/:id/cards          该笔记的卡片
+ *   POST   /api/notes/:id/cards          生成卡片（带 cards 字段 = 保存编辑后的卡片）
+ *   GET    /api/cards                    全部卡片
+ *   GET    /api/cards/due                今日到期卡片
+ *   POST   /api/cards                    手工新建卡片
+ *   PUT    /api/cards/:id                编辑卡片
+ *   DELETE /api/cards/:id                删除卡片
+ *   POST   /api/cards/:id/review         提交复习结果（间隔重复）
+ *   POST   /api/cards/:id/explain        答错后的 AI 解释
+ *   POST   /api/cards/:id/quiz           AI 单选题（可选）
+ *   GET    /api/stats                    汇总统计
+ *   GET    /api/health                   健康检查（含知识图谱 / 存储 / 密钥状态）
  *
  * API Key 读取优先级：
  *   1) 环境变量 ZHIPU_API_KEY
  *   2) 同目录 server-config.json  { "zhipuApiKey": "..." }  ← 已被 .gitignore 排除
- *   3) 都没有 → /api/chat 返回 500，并提示如何配置；页面其余功能不受影响
+ *   3) 都没有 → AI 接口返回明确提示；笔记 / 复习功能不受影响（卡片可本地规则兜底）
  *
  * 启动：PORT=3000 node server.js      （必须监听 $PORT，绑定 0.0.0.0）
  * ═══════════════════════════════════════════════════════════
  */
+'use strict';
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 3000);
-const ZHIPU_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-const MODEL = 'glm-4-flash';
-const MAX_PROMPT = 4000;
-const MAX_CONTEXT = 12000;
-const MAX_BODY = 512 * 1024;         // 请求体上限 512KB
-const UPSTREAM_TIMEOUT = 28000;
 
-/* ── 密钥 ── */
-function loadApiKey() {
-  if (process.env.ZHIPU_API_KEY && process.env.ZHIPU_API_KEY.trim()) {
-    return process.env.ZHIPU_API_KEY.trim();
-  }
-  try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'server-config.json'), 'utf8'));
-    if (cfg && typeof cfg.zhipuApiKey === 'string' && cfg.zhipuApiKey.trim()) return cfg.zhipuApiKey.trim();
-  } catch (e) { /* 文件不存在或格式错误 → 视为未配置 */ }
-  return '';
-}
+const llm = require('./server/llm');
+const store = require('./server/store');
+const kgdata = require('./server/kgdata');
+const chat = require('./server/chat');
+const summarize = require('./server/summarize');
+const notes = require('./server/notes');
+const cards = require('./server/cards');
 
-/* ── 静态资源 ── */
+/* ─────────── 静态资源 ─────────── */
 // 绝不通过 HTTP 暴露的文件（server-config.json 含 API Key；server.js/package.json 属实现细节）
 const BLOCKED_FILES = new Set([
   'server.js', 'package.json', 'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock',
   'server-config.json', 'server-config.example.json', 'vercel.json',
   'README.md', '.gitignore', '.env'
 ]);
+// 绝不暴露的目录（服务端实现与数据文件）
+const BLOCKED_DIRS = new Set(['server', '.data', '.git', 'node_modules']);
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -68,6 +82,11 @@ const MIME = {
   '.md': 'text/plain; charset=utf-8'
 };
 
+function sendText(res, status, text) {
+  res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end(text);
+}
+
 function serveStatic(req, res) {
   let urlPath;
   try { urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); }
@@ -81,9 +100,12 @@ function serveStatic(req, res) {
     return sendText(res, 403, 'Forbidden');
   }
 
-  // 敏感文件屏蔽（含 server-config.json —— 密钥绝不外泄）
+  // 敏感文件 / 目录屏蔽（含 server-config.json —— 密钥绝不外泄）
   const rel = path.relative(ROOT, abs).split(path.sep).join('/');
-  if (BLOCKED_FILES.has(rel) || rel.split('/').some(seg => seg.startsWith('.'))) {
+  const segs = rel.split('/');
+  if (BLOCKED_FILES.has(rel)
+    || segs.some(seg => seg.startsWith('.'))
+    || BLOCKED_DIRS.has(segs[0])) {
     return sendText(res, 404, 'Not Found');
   }
 
@@ -102,16 +124,12 @@ function serveStatic(req, res) {
   });
 }
 
-function sendText(res, status, text) {
-  res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.end(text);
-}
-
-/* ── JSON 工具 ── */
+/* ─────────── HTTP 辅助 ─────────── */
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-Id',
+  'Access-Control-Expose-Headers': 'Content-Length',
   'Access-Control-Max-Age': '86400'
 };
 
@@ -124,6 +142,7 @@ function sendJson(res, status, obj) {
   res.end(body);
 }
 
+const MAX_BODY = 512 * 1024;   // 请求体上限 512KB
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let size = 0;
@@ -137,131 +156,122 @@ function readBody(req) {
     req.on('error', reject);
   });
 }
-
-/* ── /api/chat ── */
-async function handleChat(req, res) {
-  // 预检
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, CORS_HEADERS);
-    return res.end();
-  }
-  if (req.method === 'GET' || req.method === 'HEAD') {
-    // 便于人肉探活：不泄露任何密钥信息，只报告是否已配置
-    return sendJson(res, 200, {
-      ok: true,
-      service: 'aero-kg-chat',
-      model: MODEL,
-      configured: !!loadApiKey(),
-      hint: 'POST { prompt, context } 获取 AI 回答'
-    });
-  }
-  if (req.method !== 'POST') {
-    return sendJson(res, 405, { ok: false, error: '仅支持 POST（浏览器会先发 OPTIONS 预检）' });
-  }
-
-  // 先校验入参（与密钥是否配置无关，保证诊断信息准确）
+async function readJson(req) {
   let raw;
   try { raw = await readBody(req); }
-  catch (e) { return sendJson(res, e.code === 413 ? 413 : 400, { ok: false, error: e.code === 413 ? '请求体过大' : '读取请求体失败' }); }
-
-  let body = null;
-  try { body = raw ? JSON.parse(raw) : null; } catch (e) { body = null; }
-  if (!body || typeof body !== 'object') {
-    return sendJson(res, 400, { ok: false, error: '请求体必须是 JSON 对象' });
-  }
-
-  const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
-  const context = typeof body.context === 'string' ? body.context.trim() : '';
-  // mode='path' 用于「AI 学习向导」的路径规划（要求严格 JSON 输出，不适用简洁约束）；默认 'qa' 即时问答
-  const isPath = body.mode === 'path';
-  if (!prompt) return sendJson(res, 400, { ok: false, error: '缺少 prompt 字段（用户问题）' });
-  if (prompt.length > MAX_PROMPT) return sendJson(res, 413, { ok: false, error: `prompt 超过 ${MAX_PROMPT} 字符上限` });
-  if (context.length > MAX_CONTEXT) return sendJson(res, 413, { ok: false, error: `context 超过 ${MAX_CONTEXT} 字符上限` });
-
-  const apiKey = loadApiKey();
-  if (!apiKey) {
-    return sendJson(res, 500, {
-      ok: false,
-      error: '服务器未配置 AI 密钥：请设置环境变量 ZHIPU_API_KEY，或在项目根目录创建 server-config.json（{"zhipuApiKey":"..."}）'
-    });
-  }
-
-  const userContent = context ? `【参考资料】\n${context}\n\n【用户问题】\n${prompt}` : prompt;
-
-  // 两种用途用不同的系统提示：'path' 要求严格 JSON（不限制字数），'qa' 要求简洁
-  const systemPrompt = isPath
-    ? [
-        '你是「航空航天知识图谱」网站的 AI 学习向导。',
-        '任务：针对用户问题规划一条 4-6 站的学习路径（引导学习，不直接灌输答案），说明每一站解决什么。',
-        '优先沿因果关系推进：先建立原理，再落到结构与限制，不要只罗列名词。',
-        '只能使用【参考资料】中列出的概念，必须使用其括号内的英文 id，按学习先后排序。',
-        '严格只输出一个 JSON 对象，不要 markdown 代码块、不要任何解释文字，格式：',
-        '{"title":"路径标题","intro":"一句话说明该路径为何能回答这个问题","steps":[{"id":"节点id","why":"这一站解决什么"}]}'
-      ].join('')
-    : [
-        '你是「航空航天知识图谱」网站的 AI 学习助手。',
-        '优先依据【参考资料】回答，并在合适时引用资料中的概念名与书页出处。',
-        '资料不足以回答时，明确说明哪部分超出了资料范围，不要编造。',
-        '回答要简洁聚焦：默认用 2-4 句话或要点列表直接回答问题，控制在 400 字以内；',
-        '只有用户明确要求详细展开时才展开。'
-      ].join('');
-
-  try {
-    const upstream = await fetch(ZHIPU_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: MODEL,
-        stream: false,
-        temperature: isPath ? 0.3 : 0.6,
-        max_tokens: isPath ? 1200 : 800,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userContent }
-        ]
-      }),
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT)
-    });
-
-    if (!upstream.ok) {
-      const detail = await upstream.text().catch(() => '');
-      const status = (upstream.status === 401 || upstream.status === 403) ? 500 : 502;
-      return sendJson(res, status, {
-        ok: false,
-        error: `智谱 API 返回 ${upstream.status}` + (upstream.status === 401 ? '（API Key 无效或过期）' : ''),
-        detail: detail.slice(0, 300)
-      });
-    }
-
-    const data = await upstream.json();
-    const answer = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-    if (!answer) {
-      return sendJson(res, 502, {
-        ok: false,
-        error: '智谱返回结构异常（未找到 choices[0].message.content）',
-        detail: JSON.stringify(data).slice(0, 300)
-      });
-    }
-    return sendJson(res, 200, { ok: true, answer: answer, model: (data && data.model) || MODEL, usage: (data && data.usage) || null });
-  } catch (err) {
-    const isTimeout = err && (err.name === 'TimeoutError' || err.name === 'AbortError');
-    return sendJson(res, isTimeout ? 504 : 502, {
-      ok: false,
-      error: isTimeout ? '请求智谱超时，请稍后重试' : ('代理请求失败：' + ((err && err.message) || '未知网络错误'))
-    });
-  }
+  catch (e) { throw Object.assign(new Error(e.code === 413 ? '请求体过大' : '读取请求体失败'), { code: e.code === 413 ? 413 : 400 }); }
+  if (!raw) return null;
+  try { return JSON.parse(raw); }
+  catch (e) { throw Object.assign(new Error('请求体不是合法 JSON'), { code: 400 }); }
+}
+function fail(res, err) {
+  return sendJson(res, (err && err.code) || 400, { ok: false, error: (err && err.message) || '请求处理失败' });
+}
+function userOf(req) {
+  return store.sanitizeUserId(req.headers['x-user-id'] || (new URL(req.url, 'http://x').searchParams.get('user_id') || ''));
 }
 
-/* ── 服务 ── */
-const server = http.createServer((req, res) => {
-  const pathname = (() => { try { return new URL(req.url, 'http://localhost').pathname; } catch (e) { return req.url; } })();
+const H = {
+  CORS_HEADERS: CORS_HEADERS,
+  sendJson: sendJson,
+  sendText: sendText,
+  readJson: readJson,
+  fail: fail,
+  userOf: userOf
+};
 
-  if (pathname === '/api/chat' || pathname === '/api/chat/') return handleChat(req, res);
-  if (pathname.startsWith('/api/')) return sendJson(res, 404, { ok: false, error: '未知接口' });
+/* ─────────── 路由表（顺序即优先级） ─────────── */
+const ROUTES = [
+  ['POST', '/api/chat', chat.handleChat],
+  ['POST', '/api/summarize/keywords', summarize.keywords],
+
+  ['GET', '/api/notes', notes.list],
+  ['POST', '/api/notes', notes.create],
+  ['GET', '/api/notes/:id/cards', notes.listCards],
+  ['POST', '/api/notes/:id/cards', notes.cards],
+  ['GET', '/api/notes/:id', notes.detail],
+  ['PUT', '/api/notes/:id', notes.update],
+  ['DELETE', '/api/notes/:id', notes.remove],
+
+  ['GET', '/api/cards/due', cards.due],
+  ['GET', '/api/cards', cards.list],
+  ['POST', '/api/cards', cards.create],
+  ['POST', '/api/cards/:id/review', cards.review],
+  ['POST', '/api/cards/:id/explain', cards.explain],
+  ['POST', '/api/cards/:id/quiz', cards.quiz],
+  ['PUT', '/api/cards/:id', cards.update],
+  ['DELETE', '/api/cards/:id', cards.remove],
+
+  ['GET', '/api/stats', notes.stats],
+  ['GET', '/api/health', health]
+];
+
+function match(pattern, pathname) {
+  const ps = pattern.split('/'), xs = pathname.split('/');
+  if (ps.length !== xs.length) return null;
+  const params = {};
+  for (let i = 0; i < ps.length; i++) {
+    if (ps[i].charAt(0) === ':') {
+      if (!xs[i]) return null;
+      params[ps[i].slice(1)] = decodeURIComponent(xs[i]);
+    } else if (ps[i] !== xs[i]) return null;
+  }
+  return params;
+}
+
+function health(req, res, params, h) {
+  const kg = kgdata.meta();
+  const s = store.stats(h.userOf(req));
+  return h.sendJson(res, 200, {
+    ok: true,
+    service: 'aero-kg',
+    uptime_s: Math.round(process.uptime()),
+    kg: kg,
+    llm: { configured: llm.configured(), models: llm.DEFAULT_MODELS, timeout_ms: llm.TIMEOUT_MS },
+    store: { file: s.storage.file, error: s.storage.error, notes: s.notes, cards: s.cards, due: s.due }
+  });
+}
+
+/* ─────────── 服务 ─────────── */
+const server = http.createServer(async (req, res) => {
+  let pathname;
+  try { pathname = new URL(req.url, 'http://localhost').pathname; }
+  catch (e) { pathname = req.url; }
+  // 统一去掉尾部斜杠（/api/notes/ → /api/notes）
+  if (pathname.length > 1 && pathname.endsWith('/')) pathname = pathname.replace(/\/+$/, '');
+
+  if (pathname.indexOf('/api/') === 0 || pathname === '/api') {
+    // 所有 /api/* 都挂 CORS 头并统一处理预检
+    for (const [k, v] of Object.entries(CORS_HEADERS)) res.setHeader(k, v);
+    if (req.method === 'OPTIONS') { res.writeHead(204, CORS_HEADERS); return res.end(); }
+
+    const method = req.method === 'HEAD' ? 'GET' : req.method;
+    for (const [m, pattern, handler] of ROUTES) {
+      if (m !== method) continue;
+      const params = match(pattern, pathname);
+      if (!params) continue;
+      try {
+        return await handler(req, res, params, H);
+      } catch (err) {
+        if (res.headersSent) return;
+        return sendJson(res, 500, { ok: false, error: '服务端异常：' + ((err && err.message) || '未知错误') });
+      }
+    }
+    // 路径存在但方法不对 → 405，便于排查
+    const allowed = ROUTES.filter(r => match(r[1], pathname)).map(r => r[0]);
+    if (allowed.length) {
+      return sendJson(res, 405, { ok: false, error: `该接口只支持 ${allowed.join(' / ')}` });
+    }
+    return sendJson(res, 404, { ok: false, error: '未知接口', path: pathname });
+  }
+
   return serveStatic(req, res);
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  const has = !!loadApiKey();
-  console.log(`AeroKG server → http://0.0.0.0:${PORT}  (AI 密钥：${has ? '已配置' : '未配置，/api/chat 将返回 500 提示'}）`);
+  const kg = kgdata.meta();
+  console.log(`AeroKG server → http://0.0.0.0:${PORT}`);
+  console.log(`  知识图谱：${kg.ok ? kg.nodes + ' 节点 / ' + kg.edges + ' 关系' : '加载失败：' + kg.error}`);
+  console.log(`  AI 密钥：${llm.configured() ? '已配置' : '未配置（AI 接口会给出提示，笔记/复习仍可用）'}`);
+  console.log(`  数据文件：${store._file.replace(/\\/g, '/')}`);
 });

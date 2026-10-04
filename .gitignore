@@ -8,3 +8,8 @@ node_modules/
 server-config.json
 .env
 .env.*
+
+# 运行期数据（笔记 / 卡片 / 复习日志），属于用户数据，不进版本库
+.data/
+.data-test/
+.data-*/

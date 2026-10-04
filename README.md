@@ -13,6 +13,8 @@
 | 🕸️ **交互式知识图谱** | ECharts 力导向图，145 个概念节点、214 条关系边，支持缩放/拖拽/图例过滤/点击进详情；节点颜色=知识类别，连线样式=关系类型 |
 | 🧭 **AI 学习向导** | ① 根据当前节点推荐下一步（因果链优先）② 浏览足迹 + 个性化知识地图（覆盖率统计）③ **探索模式**：提问不给答案，给学习路径 |
 | 💬 **AI 问答窗口** | 右下角悬浮 💬 按钮，点开即聊：本地图谱检索（问题→节点反向匹配 + 一跳关系扩展）→ 组装上下文 → `/api/chat` → AI 即时回答；支持追问（携带最近对话）、回答附「相关概念」chips 一键跳图谱 |
+| 🧩 **多关键词 AI 综述** | 足迹页勾选 3–8 个关键词 → 生成「关系总图」（Mermaid graph）+ 综述文字 + 关键关系 + 生活例子 + 易错点 + 教材出处；**图为本地图谱即时生成（毫秒级）**，AI 综述随后就位；一键「存为笔记」 |
+| 📒 **笔记本 + 知识卡片复习** | 问答 / 概念详情 / 综述都能一键存为笔记；笔记可让 AI 拆成 3–8 张可编辑卡片；复习页翻卡 + 三档反馈（忘了/模糊/记得），按简化 SM-2 计算下次复习时间；答错自动请 AI 解释；可选「选择题模式」当场出题 |
 | 📱 **响应式** | PC 侧栏详情 / 移动端抽屉式详情，一套代码两端适配 |
 
 探索模式示例：输入「为什么飞机能飞起来？」→
@@ -70,27 +72,74 @@ AI 探测失败自动回退规则引擎——功能不缺失，只是没有 LLM 
 > 两种后端实现共用同一份 `/api/chat` 契约（`{ prompt, context }` → `{ ok, answer }`），
 > 前端 `fetch('/api/chat')` 一行代码两边通吃。
 
+> **关于新功能（综述 / 笔记本 / 复习）**：这些接口都在 `server.js` 的 `/api/*` 路由里，
+> 需要 Node 单端口服务（方式一）。在纯静态托管（方式三 / 直接双击 index.html）下，
+> 前端 `AeroAPI` 探测不到后端会自动降级为**浏览器本地模式**——笔记、卡片、复习全流程照常可用
+> （数据存在本机 localStorage），只是「AI 综述 / AI 拆卡片 / AI 解释 / AI 出题」会走本地兜底。
+> Vercel（方式二）目前只搬了 `/api/chat`，新功能同样走本地模式。
+
 ## 🗂️ 目录结构
 
 ```
 aero-kg-learning/
-├── index.html          # 单页应用（图谱 / AI 向导 / 关于 三视图）
-├── server.js           # ⭐ 零依赖单端口服务：静态页 + /api/chat 智谱代理（平台托管用）
+├── index.html          # 单页应用（图谱 / 向导 / 足迹 / 笔记本 / 复习 / 关于）
+├── server.js           # ⭐ 零依赖单端口服务：静态页 + /api/* 路由（平台托管用）
+├── server/             # 后端模块（薄路由 + 各业务处理器）
+│   ├── store.js        # 笔记/卡片/复习日志的 JSON 持久化（原子写、按用户隔离、SM-2）
+│   ├── llm.js          # 智谱调用封装（glm-4-flash → glm-4-air 兜底、JSON 修复）
+│   ├── kgdata.js       # 从 data/kg.js 取节点/关系、组装上下文、图谱版综述兜底
+│   ├── prompts.js      # 内嵌提示词（综述 / 笔记转卡片 / 答错解释 / 出题）
+│   ├── summarize.js    # POST /api/summarize/keywords
+│   ├── notes.js        # 笔记 CRUD + 生成卡片
+│   ├── cards.js        # 到期卡片 / 复习 / 解释 / 出题
+│   └── chat.js         # /api/chat 智谱代理
 ├── api/chat.js         # Vercel Serverless 版智谱代理（同契约，Vercel 部署用）
 ├── package.json        # npm start → node server.js
 ├── css/style.css       # 浅色主题 + 响应式（≤900px 切抽屉）
 ├── js/
 │   ├── kg 数据见 data/；渲染见 graph.js；编排见 app.js
+│   ├── user.js         # 轻量用户身份（localStorage uid，随请求头 X-User-Id 发给服务端）
+│   ├── api.js          # AeroAPI 统一数据层：有后端走服务端，无后端自动降级 localStorage
+│   ├── mermaid-view.js # Mermaid 渲染封装（失败回退显示源码）
+│   ├── summary.js      # 足迹多选 + 生成综述弹窗（图谱版即时 + AI 版升级）
+│   ├── notes.js        # 笔记本页（列表/详情/编辑/生成可编辑卡片）
+│   ├── review.js       # 复习页（翻卡 + 三档反馈 + 答错 AI 解释 + 选择题模式）
 │   ├── guide.js        # AI 向导规则引擎 + LLM 接入预留位（LLM_SLOT）
-│   ├── chat.js         # 右下角 AI 问答窗口（悬浮按钮 + RAG 检索 + 对话渲染）
+│   ├── chat.js         # 右下角 AI 问答窗口（悬浮按钮 + RAG 检索 + 对话渲染 + 存为笔记）
 │   ├── search.js       # 搜索（四级打分：精确/前缀/包含/定义别名）
 │   ├── graph.js        # ECharts 力导向图
-│   └── app.js          # 视图切换 / 详情面板 / 向导界面
+│   └── app.js          # 视图切换 / 详情面板 / 向导界面 / 一键存笔记
 ├── data/
 │   ├── kg.js           # ⭐ 知识图谱数据：145 节点 + 214 边，每条带书页出处
 │   └── paths.js        # 20 条精选学习路径（探索模式匹配用）
-└── vendor/echarts.min.js
+├── vendor/
+│   ├── echarts.min.js
+│   └── mermaid.min.js  # 关系总图渲染（本地打包，国内直连）
+└── .data/              # 运行时数据（笔记/卡片/复习日志，已 gitignore）
 ```
+
+## 🔌 API
+
+除 `/api/chat` 外，本轮新增以下接口（均为 JSON；服务端按请求头 `X-User-Id` 或 `?user_id` 隔离数据）：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/summarize/keywords` | `{keywords:[3..8], relations?, chapterId?}` → `{data:{title,summary,key_relations,example,misconceptions,mermaid,citations}, meta}` |
+| GET/POST | `/api/notes` | 笔记列表 / 新建笔记 |
+| GET/PUT/DELETE | `/api/notes/:id` | 笔记详情 / 更新 / 删除 |
+| POST | `/api/notes/:id/cards` | 生成卡片（不带 `cards` 走 AI 生成；带 `cards` 则直接保存编辑后的草稿） |
+| GET | `/api/cards/due` | 到期卡片（含 `note_title` 与三档反馈的下次时间预览） |
+| POST | `/api/cards` | 新建卡片（快捷键兜底/手工加卡） |
+| PUT/DELETE | `/api/cards/:id` | 编辑 / 删除卡片 |
+| POST | `/api/cards/:id/review` | `{rating: again\|hard\|good}` → 按简化 SM-2 更新 `due/interval/ease/reps` |
+| POST | `/api/cards/:id/explain` | 答错后请 AI 解释（≤200 字纯文本） |
+| POST | `/api/cards/:id/quiz` | AI 依据卡片出一道单选题 |
+| GET | `/api/stats` | 笔记 / 卡片 / 复习次数统计 |
+| GET | `/api/health` | 健康检查（含真实图谱规模 + 是否已配置 Key） |
+
+> **间隔重复算法（简化 SM-2）**：卡片初始 `interval=0, ease=2.5, due=now`。
+> 记得：`interval=max(1, interval×2)`，`ease+=0.1`；模糊：`interval=max(1, interval×1.2)`；
+> 忘了：`interval=1`，`ease=max(1.3, ease-0.2)`。三档均 `reps+=1`，`due=now+interval 天`。
 
 ## 🧠 数据是怎么来的（OPC 工作流）
 

@@ -18,6 +18,17 @@
       Guide.loadTrail(); this.renderMap(); this.renderContext();
       const fs = new URLSearchParams(location.search).get('k');
       if (fs && AeroKG.nodeMap[fs]) this.openNode(fs, { fromSearch: true });
+      // 探测后端：有后端 → 笔记/卡片存服务端；没有 → 自动本地模式
+      if (window.AeroAPI) AeroAPI.init().then(() => this.renderMode()).catch(() => {});
+    },
+
+    /** 页脚显示当前数据模式，避免用户误以为"存丢了" */
+    renderMode() {
+      const el = $('footMode');
+      if (!el) return;
+      const off = AeroAPI.offline;
+      el.textContent = off ? '本地模式（数据仅存本机浏览器）' : '云端模式（笔记/卡片存于服务端）';
+      el.className = 'foot-mode' + (off ? ' local' : '');
     },
 
     /* ── 导航 ── */
@@ -29,6 +40,8 @@
           $('view-' + b.dataset.view).classList.add('active');
           if (b.dataset.view === 'graph') setTimeout(() => GraphView.refresh(), 60);
           if (b.dataset.view === 'guide') { this.renderMap(); this.renderContext(); }
+          if (b.dataset.view === 'notes' && window.AeroNotes) AeroNotes.open();
+          if (b.dataset.view === 'review' && window.AeroReview) AeroReview.open();
         });
       });
       $('brandHome').addEventListener('click', () => GraphView.resetView());
@@ -42,7 +55,9 @@
         e.currentTarget.classList.toggle('on', on);
       });
       $('btnClearTrail').addEventListener('click', () => {
-        Guide.clearTrail(); this.renderMap(); this.renderContext(); GraphView.refresh();
+        Guide.clearTrail();
+        if (window.AeroSummary) AeroSummary.reset();
+        this.renderMap(); this.renderContext(); GraphView.refresh();
       });
     },
 
@@ -106,6 +121,10 @@
         </div>
         <div class="detail-src">📖 出处：《航空航天概论》第3版 ${esc(n.evidence || '')}</div>
 
+        <div class="detail-actions">
+          <button class="btn-ghost btn-sm" id="detailSaveNote">💾 存为笔记（含关系）</button>
+        </div>
+
         <div class="detail-sec">
           <h4>📌 定义</h4>
           <div class="detail-def">${esc(n.definition)}</div>
@@ -141,6 +160,8 @@
 
       body.querySelectorAll('.rel-item, .sg-item').forEach(el =>
         el.addEventListener('click', () => this.openNode(el.dataset.id)));
+      const snb = $('detailSaveNote');
+      if (snb) snb.addEventListener('click', () => this.saveDetailNote(n));
       const moreBtn = $('detailMoreBtn');
       if (moreBtn) {
         const txt = $('detailMoreText');
@@ -150,6 +171,41 @@
           txt.style.overflow = open ? 'hidden' : 'visible';
           moreBtn.textContent = open ? '展开全部 ▾' : '收起 ▴';
         });
+      }
+    },
+
+    /* ── 概念（含关系解释）一键存为笔记 ── */
+    async saveDetailNote(n) {
+      const btn = $('detailSaveNote');
+      if (!btn) return;
+      const KG = AeroKG;
+      btn.disabled = true; btn.textContent = '保存中…';
+      try {
+        const rels = KG.edgesOf(n.id).map(e => {
+          const out = e.source === n.id;
+          const other = KG.nodeMap[out ? e.target : e.source];
+          if (!other) return '';
+          return '- ' + (out ? n.name + ' ' + KG.relLabel(e, n.id) + ' ' + other.name : other.name + ' ' + KG.relLabel(e, n.id) + ' ' + n.name)
+            + '（' + e.type + (e.ev ? ' · ' + e.ev : '') + '）';
+        }).filter(Boolean);
+        const content = [
+          '【定义】', n.definition || '',
+          n.detail ? '\n【核心解释】\n' + n.detail : '',
+          rels.length ? '\n【与图中其他概念的关系】\n' + rels.join('\n') : '',
+          '\n【教材出处】\n' + (n.evidence || '（未标注）')
+        ].join('\n');
+        const res = await AeroAPI.createNote({
+          title: '概念：' + n.name,
+          content: content,
+          source_type: 'node',
+          source_id: n.id,
+          tags: [KG.categories[n.category] || '概念', n.name]
+        });
+        btn.textContent = '✓ 已存为笔记';
+        if (window.AeroNotes && AeroNotes.onSaved) AeroNotes.onSaved(res.note);
+      } catch (e) {
+        btn.disabled = false; btn.textContent = '💾 存为笔记（含关系）';
+        alert('保存失败：' + ((e && e.message) || '未知错误'));
       }
     },
 
@@ -252,6 +308,8 @@
         <div class="ms-item"><b>${st.total}</b><span>图谱节点总数</span></div>
         <div class="ms-item"><b>${st.pct}%</b><span>覆盖率</span></div>`;
       const list = $('trailList');
+      // 足迹列表（多选综述 UI）交给 js/summary.js 统一渲染，避免两处各写一遍
+      if (window.AeroSummary) { AeroSummary.render(); return; }
       if (!Guide.trail.length) {
         list.innerHTML = '<div class="trail-empty">暂无足迹 —— 去图谱里点开一个概念吧。</div>';
         return;
