@@ -113,7 +113,6 @@
         </div>`;
       }).join('');
 
-      const media = n.media || {};
       body.innerHTML = `
         <div class="detail-head">
           <div class="detail-name">${esc(n.name)}</div>
@@ -143,11 +142,7 @@
 
         <div class="detail-sec">
           <h4>🖼️ 图文 / 视频</h4>
-          <div class="media-grid">
-            <div class="media-ph"><span class="mi">🖼️</span>示意图占位</div>
-            <div class="media-ph"><span class="mi">🎬</span>视频占位</div>
-          </div>
-          <div class="media-note">${esc(media.note || '本站为演示项目，媒体区预留占位。建议来源：NASA 官网、维基百科「' + esc(n.name) + '」词条、B站公开课检索「' + esc(n.name) + '」。')}</div>
+          ${this.mediaHtml(n)}
         </div>
 
         ${sugg ? `<div class="detail-sec">
@@ -172,6 +167,40 @@
           moreBtn.textContent = open ? '展开全部 ▾' : '收起 ▴';
         });
       }
+
+      // 详情页刚插入了新图片 → 重新触发全局放大绑定（滚轮/拖拽/全屏）
+      if (window.AeroLightbox) AeroLightbox.refresh(body);
+    },
+
+    /* ── 图文 / 视频：imageUrl 有值 → 真图 + 点击放大；为空 → "暂无图片" ── */
+    mediaHtml(n) {
+      const m = n.media || {};
+      const img = n.imageUrl || m.imageUrl || '';
+      const vid = n.videoUrl || m.videoUrl || '';
+      const cap = n.imageCaption || m.caption || (n.name + ' 示意图');
+      const vcap = n.videoCaption || m.videoCaption || (n.name + ' 讲解视频');
+
+      const imgBlock = img
+        ? `<figure class="media-fig">
+             <img class="zoomable" src="${esc(img)}" data-caption="${esc(cap)}" alt="${esc(cap)}" loading="lazy" draggable="false">
+             <span class="zoom-hint">🔍 点击放大</span>
+             <figcaption>${esc(cap)}</figcaption>
+           </figure>`
+        : `<div class="media-ph"><span class="mi">🖼️</span>暂无图片</div>`;
+
+      const vidBlock = vid
+        ? `<figure class="media-fig media-fig-video">
+             <video class="media-video" src="${esc(vid)}" controls playsinline preload="metadata"></video>
+             <figcaption>${esc(vcap)}</figcaption>
+           </figure>`
+        : `<div class="media-ph"><span class="mi">🎬</span>视频占位</div>`;
+
+      const note = m.note || ((img || vid) ? '' :
+        '本站为演示项目，媒体区暂为占位。建议来源：NASA 官网、维基百科「' + n.name + '」词条、B站公开课检索「' + n.name + '」。');
+
+      return `
+          <div class="media-grid ${img ? 'has-img' : ''}">${imgBlock}${vidBlock}</div>
+          ${note ? `<div class="media-note">${esc(note)}</div>` : ''}`;
     },
 
     /* ── 概念（含关系解释）一键存为笔记 ── */

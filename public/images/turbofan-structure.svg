@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" width="980" height="470" font-family="'PingFang SC','Microsoft YaHei','Segoe UI',system-ui,sans-serif">
+  <rect width="980" height="470" fill="#ffffff"/>
+
+  <text x="30" y="40" font-size="20" font-weight="700" fill="#1f2a3a">涡轮风扇发动机 · 结构示意（涵道比 = 外涵流量 / 内涵流量）</text>
+  <text x="30" y="63" font-size="12.5" fill="#93a1b5">依据《航空航天概论》第3版 · 书页147-149</text>
+  <line x1="30" y1="78" x2="950" y2="78" stroke="#e3e9f2" stroke-width="1.5"/>
+
+  <!-- ① 短舱（外壳） -->
+  <path d="M110 92 L880 92 Q906 92 906 120 L906 356 Q906 384 880 384 L110 384 Q84 384 84 356 L84 120 Q84 92 110 92 Z"
+        fill="#f7fafd" stroke="#c3d3e8" stroke-width="2"/>
+  <!-- ② 核心机涵道 -->
+  <path d="M250 186 L780 186 Q800 186 800 206 L800 270 Q800 290 780 290 L250 290 Q230 290 230 270 L230 206 Q230 186 250 186 Z"
+        fill="#eef4fc" stroke="#8fb2dd" stroke-width="2"/>
+
+  <!-- ③ 气流（画在部件下面，看起来是"穿过"机器） -->
+  <g stroke="#7fb2e0" stroke-width="2" fill="none" marker-end="url(#a2)">
+    <path d="M60 120 L892 120"/>
+    <path d="M60 148 L892 148"/>
+    <path d="M60 322 L892 322"/>
+    <path d="M60 350 L892 350"/>
+  </g>
+  <g stroke="#d4822e" stroke-width="2" fill="none" marker-end="url(#a3)">
+    <path d="M232 214 L900 214"/>
+    <path d="M232 262 L900 262"/>
+  </g>
+
+  <!-- ④ 部件（压住气流线，形成"穿过"的效果） -->
+  <ellipse cx="168" cy="238" rx="11" ry="122" fill="#4a7fc1"/>
+  <ellipse cx="196" cy="238" rx="8" ry="112" fill="#6a97cf"/>
+
+  <g fill="#cfe0f4" stroke="#7fa6d4" stroke-width="1.6">
+    <path d="M262 200 L262 276 L296 268 L296 208 Z"/>
+    <path d="M300 208 L300 268 L330 262 L330 214 Z"/>
+    <path d="M340 214 L340 262 L372 258 L372 218 Z"/>
+    <path d="M376 218 L376 258 L406 254 L406 222 Z"/>
+    <path d="M410 222 L410 254 L438 250 L438 226 Z"/>
+  </g>
+  <path d="M452 204 L560 204 Q578 204 578 224 L578 252 Q578 272 560 272 L452 272 Q440 272 440 258 L440 218 Q440 204 452 204 Z"
+        fill="#ffe6c9" stroke="#d4822e" stroke-width="2"/>
+  <g fill="#e8842e">
+    <path d="M500 266 C488 246 496 226 510 216 C508 236 520 244 516 260 Z" opacity="0.85"/>
+    <path d="M534 266 C524 248 532 228 544 218 C542 238 552 246 548 260 Z" opacity="0.7"/>
+  </g>
+  <g fill="#e6d3f2" stroke="#9a6fc0" stroke-width="1.6">
+    <path d="M594 204 L594 272 L624 264 L624 212 Z"/>
+    <path d="M630 212 L630 264 L658 258 L658 218 Z"/>
+    <path d="M664 218 L664 258 L690 252 L690 224 Z"/>
+  </g>
+  <path d="M750 190 L846 208 L846 268 L750 286 Z" fill="#eef4fc" stroke="#8fb2dd" stroke-width="2"/>
+
+  <!-- ⑤ 主轴 -->
+  <line x1="168" y1="238" x2="676" y2="238" stroke="#5b6b80" stroke-width="3" stroke-dasharray="10 6"/>
+
+  <!-- ⑥ 部件名 -->
+  <g font-size="12" font-weight="600" fill="#2f6fd6" text-anchor="middle">
+    <text x="176" y="410">风扇</text>
+    <text x="296" y="410">低压压气机</text>
+    <text x="390" y="410">高压压气机</text>
+    <text x="509" y="410" fill="#c2691b">燃烧室</text>
+    <text x="642" y="410" fill="#7d55a8">涡轮（高/低压）</text>
+    <text x="798" y="410">尾喷管</text>
+  </g>
+  <text x="300" y="180" font-size="11" fill="#5b6b80">主轴（涡轮带动压气机与风扇）</text>
+
+  <!-- ⑦ 图例 -->
+  <g font-size="11.5">
+    <line x1="30" y1="434" x2="58" y2="434" stroke="#7fb2e0" stroke-width="3"/>
+    <text x="64" y="438" fill="#2f6fd6">外涵气流（冷）— 不经过核心机，直接排出</text>
+    <line x1="330" y1="434" x2="358" y2="434" stroke="#d4822e" stroke-width="3"/>
+    <text x="364" y="438" fill="#b06a1f">内涵气流（热）— 经过核心机加速排出</text>
+  </g>
+  <text x="30" y="458" font-size="11.5" fill="#93a1b5">涵道比越大 → 推进效率越高、耗油率越低、噪声越小（民航客机常取 5～10）；军用加力涡扇涵道比小，追求高速与大推力。</text>
+
+  <defs>
+    <marker id="a2" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#7fb2e0"/></marker>
+    <marker id="a3" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#d4822e"/></marker>
+  </defs>
+</svg>

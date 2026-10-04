@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" font-family="'PingFang SC','Microsoft YaHei','Segoe UI',system-ui,sans-serif">
+  <rect width="900" height="640" fill="#ffffff"/>
+
+  <text x="30" y="40" font-size="20" font-weight="700" fill="#1f2a3a">大气层的分层（按气温随高度的变化划分）</text>
+  <text x="30" y="63" font-size="12.5" fill="#93a1b5">依据《航空航天概论》第3版 · 书页61-62</text>
+  <line x1="30" y1="78" x2="870" y2="78" stroke="#e3e9f2" stroke-width="1.5"/>
+
+  <!-- 分层（自下而上） -->
+  <g stroke="#ffffff" stroke-width="2">
+    <rect x="180" y="528" width="580" height="62" fill="#e8f3fd"/>
+    <rect x="180" y="446" width="580" height="82" fill="#eef7f1"/>
+    <rect x="180" y="372" width="580" height="74" fill="#fdf3e6"/>
+    <rect x="180" y="218" width="580" height="154" fill="#fdeef0"/>
+    <rect x="180" y="146" width="580" height="72" fill="#f1ecfb"/>
+  </g>
+
+  <!-- 高度刻度 -->
+  <g stroke="#c3d3e8" stroke-width="1.2" stroke-dasharray="5 4">
+    <line x1="140" y1="590" x2="760" y2="590"/>
+    <line x1="140" y1="528" x2="760" y2="528"/>
+    <line x1="140" y1="446" x2="760" y2="446"/>
+    <line x1="140" y1="372" x2="760" y2="372"/>
+    <line x1="140" y1="218" x2="760" y2="218"/>
+    <line x1="140" y1="146" x2="760" y2="146"/>
+  </g>
+  <g font-size="11.5" fill="#93a1b5" text-anchor="end">
+    <text x="134" y="594">0 km</text>
+    <text x="134" y="532">12 km</text>
+    <text x="134" y="450">50 km</text>
+    <text x="134" y="376">85 km</text>
+    <text x="134" y="222">800 km</text>
+    <text x="134" y="150">2000+ km</text>
+  </g>
+  <line x1="168" y1="590" x2="168" y2="140" stroke="#5b6b80" stroke-width="2" marker-end="url(#au)"/>
+  <text x="148" y="132" font-size="12" font-weight="600" fill="#5b6b80">高度</text>
+
+  <!-- 层名 -->
+  <g font-size="15" font-weight="700">
+    <text x="204" y="566" fill="#2f6fd6">对流层</text>
+    <text x="204" y="493" fill="#2f9e77">平流层</text>
+    <text x="204" y="415" fill="#b06a1f">中间层</text>
+    <text x="204" y="301" fill="#c0392b">热层</text>
+    <text x="204" y="188" fill="#7d55a8">散逸层</text>
+  </g>
+
+  <!-- 说明 -->
+  <g font-size="12" fill="#5b6b80">
+    <text x="300" y="553">天气变化最复杂的一层，集中了大部分大气质量。</text>
+    <text x="300" y="573">上界：赤道 16～18km、中纬 9～12km、两极 7～8km</text>
+    <text x="300" y="492">气流以水平流动为主，平稳、能见度好；30km 以上臭氧吸收紫外线使气温升高。</text>
+    <text x="300" y="414">气温随高度下降，空气有强烈铅垂运动，又称"高空对流层"。</text>
+    <text x="300" y="290">空气高度电离，温度随高度上升。</text>
+    <text x="300" y="312">极光、流星余迹出现在此层。</text>
+    <text x="300" y="188">地球大气最外层，空气极其稀薄，大气分子不断向星际空间逃逸。</text>
+  </g>
+
+  <!-- 航空器主要活动区（对流层 + 平流层） -->
+  <rect x="782" y="446" width="86" height="144" fill="none" stroke="#2f6fd6" stroke-width="2" stroke-dasharray="6 4" rx="6"/>
+  <g font-size="12" font-weight="600" fill="#2f6fd6" text-anchor="middle">
+    <text x="825" y="502">航空器</text>
+    <text x="825" y="522">主要</text>
+    <text x="825" y="542">活动区</text>
+  </g>
+
+  <!-- 地球表面 -->
+  <path d="M40 598 Q450 586 860 598 L860 640 L40 640 Z" fill="#dcecd9" stroke="#8fbf88" stroke-width="2"/>
+  <text x="46" y="624" font-size="12" fill="#4a7a45">地球表面 / 海平面</text>
+  <text x="250" y="624" font-size="11.5" fill="#6b8f66">注：各层分界高度为平均值，随纬度与季节变化。</text>
+
+  <defs>
+    <marker id="au" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="5" refY="2" orient="auto"><path d="M0,9 L10,9 L5,0 Z" fill="#5b6b80"/></marker>
+  </defs>
+</svg>

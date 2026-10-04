@@ -35,7 +35,15 @@ window.AeroKG = {
     rocket: '#c2504a', combo: '#6b7fd6', test: '#5f8a8b'
   },
 
-  /* ───────────────── 节点 ───────────────── */
+  /* ───────────────── 节点 ─────────────────
+     【给知识点配图】在节点上加两个可选字段即可，前端会自动渲染并支持点击放大：
+       imageUrl:     '/images/文件名.png'   ← 图片放在 public/images/ 目录下
+       imageCaption: '示意图说明'            ← 可选；不写则默认用「节点名 + 示意图」
+     也可写成嵌套形式：media: { imageUrl, videoUrl, caption, note }
+     视频：videoUrl: '/images/xxx.mp4'（同样放 public/images/，支持点击播放与拖动进度条）
+     imageUrl 为空 → 详情页显示「暂无图片」，不会报错。
+     支持 png / jpg / webp / svg / gif；svg 最清晰且体积小，适合原理示意图。
+     ─────────────────────────────────────── */
   nodes: [
     // ── 知识框架（延伸位：来自目录，标注待扩展）──
     { id: 'vehicle', name: '飞行器', category: 'framework', ch: 1, evidence: '书页4-10（目录）',
@@ -53,6 +61,8 @@ window.AeroKG = {
       definition: '飞行环境对飞行器的结构、材料、机载设备和飞行性能都有非常重要的影响，包括大气飞行环境和空间飞行环境。',
       detail: '只有了解和掌握飞行环境的变化规律，设法克服或减少其影响，才能保证飞行器准确可靠地飞行。' },
     { id: 'atmosphere', name: '大气环境', category: 'environ', ch: 2, evidence: '书页61',
+      imageUrl: '/images/atmosphere-layers.svg',
+      imageCaption: '大气层分层示意（按气温随高度的变化划分）',
       definition: '航空器唯一的飞行环境，也是航天器、火箭和导弹必经的飞行环境。大气层总质量的90%集中在15km高度以内，99.9%集中在50km以内。',
       detail: '空气密度、温度、压强和天气等因素对飞行影响很大，甚至关系到飞行成败。大气层自下而上分为对流层、平流层、中间层、热层和散逸层五个层次。' },
     { id: 'troposphere', name: '对流层', category: 'environ', ch: 2, evidence: '书页61',
@@ -121,6 +131,8 @@ window.AeroKG = {
       definition: '平板剖面与气流平行时只有很小的摩擦阻力、无升力；与气流垂直时前后形成压强差，产生很大的压差阻力；成一定夹角时产生既非垂直也非平行的空气动力R。',
       detail: '把R分解为垂直于气流方向的升力Y和平行于气流方向的阻力D。风筝就是靠这个升力支持在空中的——这是理解机翼产生升力的基础模型。' },
     { id: 'lift', name: '机翼升力', category: 'flow', ch: 2, evidence: '书页75-76',
+      imageUrl: '/images/lift-airfoil.svg',
+      imageCaption: '机翼升力原理 · 翼型剖面与压力分布',
       definition: '气流流过翼型时，上翼面通道变窄、流速大、压强低，下翼面受阻拦、流速小、压强高，上下翼面形成压强差，从而产生向上的升力Y。',
       detail: '升力公式 Y = Cy·½ρU²S。升力与机翼面积S、空气密度ρ成正比，与相对速度的平方成正比；升力系数Cy随迎角变化。' },
     { id: 'airfoil', name: '翼型', category: 'wing', ch: 2, evidence: '书页75、90',
@@ -380,6 +392,8 @@ window.AeroKG = {
       definition: '主要由螺旋桨提供拉力（约90%）、燃气提供少量推力（<10%）的燃气涡轮发动机。涡轮大部分能量经减速器带动螺旋桨转动。',
       detail: '与活塞发动机比：功率重量比大、耗油率低、振动小、高空性能好。在700km/h以下的低亚声速飞行时效率高、经济性好；速度超过800km/h时桨尖出现超声速气流、效率急剧下降。' },
     { id: 'turbofan', name: '涡轮风扇发动机', category: 'engine', ch: 3, evidence: '书页147-149',
+      imageUrl: '/images/turbofan-structure.svg',
+      imageCaption: '涡轮风扇发动机结构示意 · 内涵道 / 外涵道',
       definition: '在涡喷基础上增加风扇和驱动风扇的低压涡轮的发动机。气流分两路：内涵道经核心机（同涡喷），外涵道经风扇压缩后直接或混合后排出。',
       detail: '又称为内外涵发动机。亚声速飞行时效率较高、噪音较小、耗油率低、经济性好，非常适合Ma=0.8～0.9的民用客机和军用运输机。发展三趋势：高涵道比、高涡轮前温度、高增压比。' },
     { id: 'bypass_ratio', name: '涵道比', category: 'engine', ch: 3, evidence: '书页148',

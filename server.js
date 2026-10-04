@@ -73,7 +73,16 @@ const MIME = {
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
   '.webp': 'image/webp',
+  '.avif': 'image/avif',
   '.ico': 'image/x-icon',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.ogv': 'video/ogg',
+  '.mov': 'video/quicktime',
+  '.m4v': 'video/x-m4v',
+  '.mp3': 'audio/mpeg',
+  '.m4a': 'audio/mp4',
+  '.wav': 'audio/wav',
   '.woff2': 'font/woff2',
   '.woff': 'font/woff',
   '.ttf': 'font/ttf',
@@ -87,6 +96,48 @@ function sendText(res, status, text) {
   res.end(text);
 }
 
+/* 发送文件：媒体文件支持 HTTP Range（视频可拖动进度条 / 分段缓存） */
+function sendFile(req, res, abs, buf) {
+  const ext = path.extname(abs).toLowerCase();
+  const type = MIME[ext] || 'application/octet-stream';
+  const isMedia = /^(video|audio)\//.test(type);
+  const range = req && req.headers && req.headers.range;
+
+  if (isMedia && range) {
+    const m = /^bytes=(\d*)-(\d*)$/.exec(String(range).trim());
+    if (m) {
+      let start = m[1] === '' ? null : parseInt(m[1], 10);
+      let end = m[2] === '' ? null : parseInt(m[2], 10);
+      if (start === null && end !== null) { start = Math.max(0, buf.length - end); end = buf.length - 1; }
+      if (start === null) start = 0;
+      if (end === null || end >= buf.length) end = buf.length - 1;
+      if (start > end || start >= buf.length) {
+        res.writeHead(416, { 'Content-Range': 'bytes */' + buf.length, 'Accept-Ranges': 'bytes' });
+        return res.end();
+      }
+      const chunk = buf.subarray(start, end + 1);
+      res.writeHead(206, {
+        'Content-Type': type,
+        'Content-Length': chunk.length,
+        'Content-Range': 'bytes ' + start + '-' + end + '/' + buf.length,
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=3600',
+        'X-Content-Type-Options': 'nosniff'
+      });
+      return res.end(chunk);
+    }
+  }
+
+  res.writeHead(200, {
+    'Content-Type': type,
+    'Content-Length': buf.length,
+    'Accept-Ranges': isMedia ? 'bytes' : 'none',
+    'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+    'X-Content-Type-Options': 'nosniff'
+  });
+  res.end(buf);
+}
+
 function serveStatic(req, res) {
   let urlPath;
   try { urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); }
@@ -94,34 +145,39 @@ function serveStatic(req, res) {
 
   if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
 
-  // 路径穿越防护：解析后的绝对路径必须仍在项目目录内
-  const abs = path.normalize(path.join(ROOT, urlPath));
-  if (abs !== ROOT && !abs.startsWith(ROOT + path.sep)) {
-    return sendText(res, 403, 'Forbidden');
-  }
+  // 候选顺序：public/ 优先（约定的静态资源目录）→ 项目根
+  // 于是「图片放 public/images/、前端写 /images/xx.png」两边都对得上
+  const candidates = [
+    path.normalize(path.join(ROOT, 'public', urlPath)),
+    path.normalize(path.join(ROOT, urlPath))
+  ];
 
-  // 敏感文件 / 目录屏蔽（含 server-config.json —— 密钥绝不外泄）
-  const rel = path.relative(ROOT, abs).split(path.sep).join('/');
-  const segs = rel.split('/');
-  if (BLOCKED_FILES.has(rel)
-    || segs.some(seg => seg.startsWith('.'))
-    || BLOCKED_DIRS.has(segs[0])) {
-    return sendText(res, 404, 'Not Found');
-  }
-
-  fs.readFile(abs, (err, buf) => {
-    if (err) {
+  let i = 0;
+  const tryNext = () => {
+    if (i >= candidates.length) {
       if (urlPath === '/index.html') return sendText(res, 500, 'index.html 缺失');
       return sendText(res, 404, 'Not Found');
     }
-    res.writeHead(200, {
-      'Content-Type': MIME[path.extname(abs).toLowerCase()] || 'application/octet-stream',
-      'Content-Length': buf.length,
-      'Cache-Control': path.extname(abs) === '.html' ? 'no-cache' : 'public, max-age=3600',
-      'X-Content-Type-Options': 'nosniff'
+    const abs = candidates[i++];
+
+    // 路径穿越防护：解析后的绝对路径必须仍在项目目录内
+    if (abs !== ROOT && !abs.startsWith(ROOT + path.sep)) return tryNext();
+
+    // 敏感文件 / 目录屏蔽（含 server-config.json —— 密钥绝不外泄）
+    const rel = path.relative(ROOT, abs).split(path.sep).join('/');
+    const segs = rel.split('/');
+    if (BLOCKED_FILES.has(rel)
+      || segs.some(seg => seg.startsWith('.'))
+      || BLOCKED_DIRS.has(segs[0])) {
+      return tryNext();
+    }
+
+    fs.readFile(abs, (err, buf) => {
+      if (err || !buf) return tryNext();
+      sendFile(req, res, abs, buf);
     });
-    res.end(buf);
-  });
+  };
+  tryNext();
 }
 
 /* ─────────── HTTP 辅助 ─────────── */
@@ -182,7 +238,9 @@ const H = {
 
 /* ─────────── 路由表（顺序即优先级） ─────────── */
 const ROUTES = [
+  // GET /api/chat 是探活端点（不泄露密钥，只报告是否已配置），POST 才是真正的问答
   ['POST', '/api/chat', chat.handleChat],
+  ['GET', '/api/chat', chat.handleChat],
   ['POST', '/api/summarize/keywords', summarize.keywords],
 
   ['GET', '/api/notes', notes.list],

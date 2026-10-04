@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="'PingFang SC','Microsoft YaHei','Segoe UI',system-ui,sans-serif">
+  <rect width="900" height="560" fill="#ffffff"/>
+
+  <text x="30" y="40" font-size="20" font-weight="700" fill="#1f2a3a">机翼升力原理（翼型剖面示意）</text>
+  <text x="30" y="63" font-size="12.5" fill="#93a1b5">依据《航空航天概论》第3版 · 书页75-76</text>
+  <line x1="30" y1="78" x2="870" y2="78" stroke="#e3e9f2" stroke-width="1.5"/>
+
+  <!-- 前方来流 -->
+  <text x="30" y="150" font-size="13" font-weight="600" fill="#5b6b80">前方来流 V∞</text>
+  <g stroke="#8fb2dd" stroke-width="1.8" fill="none">
+    <path d="M110 170 L186 170" marker-end="url(#ar)"/>
+    <path d="M110 306 L186 306" marker-end="url(#ar)"/>
+    <path d="M110 468 L186 468" marker-end="url(#ar)"/>
+  </g>
+
+  <!-- 流线：上表面流管变窄（加速），下表面受阻（减速） -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M200 170 C330 166 440 148 900 194" stroke="#5b9bd5" stroke-width="2.2"/>
+    <path d="M200 218 C340 212 456 196 900 240" stroke="#7fb2e0" stroke-width="2"/>
+    <path d="M200 262 C356 258 476 244 900 284" stroke="#a8c8e8" stroke-width="1.8"/>
+    <path d="M200 382 C360 388 486 382 900 366" stroke="#d8a86f" stroke-width="1.8"/>
+    <path d="M200 430 C360 438 486 432 900 410" stroke="#e0bd90" stroke-width="2"/>
+    <path d="M200 478 C360 488 486 480 900 462" stroke="#ecd3b0" stroke-width="2.2"/>
+  </g>
+
+  <!-- 翼型（迎角 6°：前缘高、后缘低） -->
+  <g transform="rotate(6 470 324)">
+    <path d="M250 324 C330 268 520 266 690 318 C520 352 330 356 250 324 Z"
+          fill="#dfe9f7" stroke="#2f6fd6" stroke-width="2.6"/>
+    <line x1="250" y1="324" x2="690" y2="324" stroke="#2f6fd6" stroke-width="1.2" stroke-dasharray="7 5"/>
+  </g>
+  <text x="212" y="292" font-size="11.5" fill="#2f6fd6">前缘</text>
+  <text x="676" y="372" font-size="11.5" fill="#2f6fd6">后缘</text>
+
+  <!-- 上表面：低压（吸力，箭头向上） -->
+  <g stroke="#5b9bd5" stroke-width="2.2">
+    <line x1="345" y1="242" x2="345" y2="192" marker-end="url(#ab)"/>
+    <line x1="565" y1="266" x2="565" y2="216" marker-end="url(#ab)"/>
+  </g>
+  <!-- 下表面：高压（把机翼往上顶，箭头向上） -->
+  <g stroke="#d4822e" stroke-width="2.4">
+    <line x1="345" y1="430" x2="345" y2="362" marker-end="url(#ao)"/>
+    <line x1="565" y1="446" x2="565" y2="384" marker-end="url(#ao)"/>
+  </g>
+
+  <!-- 升力 -->
+  <line x1="455" y1="436" x2="455" y2="206" stroke="#d6544a" stroke-width="3.6" marker-end="url(#ar2)"/>
+  <text x="472" y="222" font-size="17" font-weight="700" fill="#d6544a">升力 L</text>
+  <text x="472" y="244" font-size="11.5" fill="#d6544a">上下表面压力差合成 · 垂直于相对气流</text>
+
+  <text x="614" y="130" font-size="13" font-weight="600" fill="#2f6fd6">上表面：流速快 → 压强低</text>
+  <text x="614" y="150" font-size="11.5" fill="#5b9bd5">（箭头表示吸力方向）</text>
+  <text x="614" y="500" font-size="13" font-weight="600" fill="#b06a1f">下表面：流速慢 → 压强高</text>
+  <text x="614" y="520" font-size="11.5" fill="#d4822e">（箭头表示压力把机翼往上顶）</text>
+
+  <text x="30" y="530" font-size="11.5" fill="#93a1b5">迎角 α：翼弦（虚线）与相对气流的夹角，图中为 6°。</text>
+  <text x="30" y="550" font-size="11.5" fill="#93a1b5">流线与箭头仅为示意，未按真实比例；实际升力还受翼型弯度与空气黏性影响。</text>
+
+  <defs>
+    <marker id="ar" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#8fb2dd"/></marker>
+    <marker id="ab" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="6" refY="2" orient="auto"><path d="M0,10 L12,10 L6,0 Z" fill="#5b9bd5"/></marker>
+    <marker id="ao" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="6" refY="2" orient="auto"><path d="M0,10 L12,10 L6,0 Z" fill="#d4822e"/></marker>
+    <marker id="ar2" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="8" refY="8" orient="auto"><path d="M0,0 L15,8 L0,16 Z" fill="#d6544a"/></marker>
+  </defs>
+</svg>
