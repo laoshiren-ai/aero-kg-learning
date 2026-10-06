@@ -907,3 +907,63 @@ input { font-family: inherit; }
   .alb-img { max-width: 96vw; max-height: 74vh; }
   .media-fig img { max-height: 220px; }
 }
+
+/* ═══════════ 节点知识卡片（AeroNodeCard） ═══════════
+   没有本地示意图的节点用它替代"图片待补充"占位。
+   卡片式排版：标题 + 分段（定义 / 核心公式 / 关系解释 / 例子 / 常见误区）。 */
+.ncard-host { min-height: 40px; }
+.ncard {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 13px 13px; box-shadow: 0 2px 10px rgba(31, 42, 58, .04);
+}
+.ncard-top {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin-bottom: 10px; padding-bottom: 9px; border-bottom: 1px dashed var(--line);
+}
+.ncard-badge {
+  font-size: 10.5px; font-weight: 600; color: var(--accent);
+  background: var(--accent-soft); padding: 2px 7px; border-radius: 6px;
+}
+.ncard-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+.ncard-tag { font-size: 10px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+.ncard-cache { font-size: 10px; color: var(--ok); background: #eef8f3; border-radius: 5px; padding: 2px 6px; margin-left: auto; }
+.ncard-spin { font-size: 11px; color: var(--accent); margin-left: auto; }
+
+.ncard-sec { margin-bottom: 10px; }
+.ncard-sec:last-child { margin-bottom: 0; }
+.ncard-k { font-size: 11.5px; font-weight: 700; color: var(--ink-2); margin-bottom: 4px; letter-spacing: .2px; }
+.ncard-v { font-size: 12.5px; color: var(--ink-2); line-height: 1.75; }
+.ncard-v p { margin: 0 0 4px; }
+.ncard-v p:last-child { margin-bottom: 0; }
+.ncard-def .ncard-v { color: var(--ink); }
+
+/* 核心公式：普通文本 + 上下标，衬线字体更像公式 */
+.ncard-formula {
+  font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+  font-size: 14px; color: var(--ink); line-height: 1.9;
+  background: #f7f9fd; border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 7px 10px; word-break: break-word;
+}
+
+/* 可选流程图（流程型知识点才有） */
+.ncard-mmd-sec { border-top: 1px dashed var(--line); padding-top: 10px; }
+.ncard-mmd { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px; overflow-x: auto; }
+.ncard-mmd svg { max-width: 100%; height: auto; }
+.ncard-mmd .mmd-raw { font-size: 10.5px; }
+
+.ncard-note {
+  margin-top: 10px; font-size: 10.5px; color: var(--ink-3); line-height: 1.6;
+  background: #f8fafc; border-radius: 7px; padding: 7px 9px;
+}
+
+/* 加载骨架 */
+.sk-line {
+  height: 9px; border-radius: 5px; margin-bottom: 8px;
+  background: linear-gradient(90deg, #eef2f8 25%, #e2e9f4 37%, #eef2f8 63%);
+  background-size: 400% 100%; animation: skmove 1.3s ease infinite;
+}
+.sk-line.w90 { width: 90%; } .sk-line.w85 { width: 85%; }
+.sk-line.w75 { width: 75%; } .sk-line.w60 { width: 60%; }
+@keyframes skmove { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+.ncard-hint { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; line-height: 1.6; }

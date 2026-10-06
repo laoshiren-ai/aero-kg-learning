@@ -325,6 +325,22 @@
       try { return await server('POST', '/api/cards/' + encodeURIComponent(id) + '/quiz', {}); }
       catch (e) { if (!e.__offline) throw e; return { ok: false, notice: '本地模式下没有 AI，选择题模式不可用。' }; }
     },
+    /* ── 节点知识卡片（"没有本地示意图"的节点用） ──
+       服务端有公共缓存：同一知识点只会真正调一次 AI。
+       本地模式（没后端）→ 返回 ok:false，由 js/nodecard.js 用教材原文兜底渲染。 */
+    async nodeCard(payload) {
+      try { return await call('POST', '/api/node-card', payload, 70000); }
+      catch (e) {
+        if (e && !e.__offline && !(e instanceof TypeError)) throw e;
+        state.offline = true;
+        state.reason = (e instanceof TypeError) ? 'network' : 'no_backend';
+        return {
+          ok: false, reason: 'offline', local: true,
+          notice: '当前是本地模式（未连接后端服务），先用教材原文与图谱关系为你展示这个知识点。'
+        };
+      }
+    },
+
     async stats() {
       try { return (await server('GET', '/api/stats')).stats; }
       catch (e) { if (!e.__offline) throw e; return Local.stats(); }

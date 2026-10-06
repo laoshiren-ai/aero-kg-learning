@@ -122,9 +122,47 @@ function quizUser(front, back) {
 const QUIZ_SYSTEM = '你是出题老师，严格依据给定的卡片内容出单选题，'
   + '只输出 JSON 对象（不要 markdown 代码块、不要多余文字）。';
 
+/* ─────────────── 5) 节点知识卡片（没有本地图的节点用） ───────────────
+   主提示词照用户给定的原文实现；末尾追加两条"补充规则"：
+     · 若提供了教材原文 / 图谱关系，则以它们为准，避免幻觉；
+     · 流程型知识点可选追加【流程图】Mermaid 代码（用户要求的"例外"分支）。
+   ─────────────────────────────────────────────────────────── */
+function nodeCardUser(p) {
+  const lines = [
+    '你是一名航空发动机与航天原理助教。请为知识点“' + (p.name || '') + '”生成一张知识卡片，用纯文本返回，不要 Markdown 代码块。格式：',
+    '【定义】……',
+    '【核心公式】……（如果没有公式就写“无”）',
+    '【关系解释】……（解释它和上下游概念的关系）',
+    '【例子】……',
+    '【常见误区】……',
+    '要求：语言通俗，适合初学者，不超过 300 字。'
+  ];
+
+  if (p.context) {
+    lines.push('本题知识点的教材原文（请在它的基础上讲解，不要编造教材之外的内容）：');
+    lines.push(p.context);
+  }
+  if (p.relations && p.relations.length) {
+    lines.push('知识图谱中它与相邻概念的关系（写【关系解释】时请参考）：');
+    lines.push(p.relations.join('；'));
+  }
+
+  lines.push('补充规则（只在这一种情况下才需要）：如果这个知识点本身是一个**流程 / 过程**'
+    + '（例如四冲程、工作循环、起飞降落过程、火箭发射流程），'
+    + '就在最后额外追加一段【流程图】：单独一行写“【流程图】”，紧接着若干行 Mermaid 代码，'
+    + '只允许 graph TD 语法、不超过 8 行、节点用中文、不要 ``` 围栏；'
+    + '如果它不是流程型知识点，就绝对不要出现【流程图】这一段。');
+  return lines.join('\n');
+}
+
+const NODE_CARD_SYSTEM = '你是一名航空发动机与航天原理助教，面向初学者讲解。'
+  + '只输出纯文本：不要 JSON、不要 Markdown 代码块、不要 ``` 围栏、不要 # 标题符号。'
+  + '必须依次输出【定义】【核心公式】【关系解释】【例子】【常见误区】五段，每段都以【】标记开头。';
+
 module.exports = {
   SUMMARY_JSON_SHAPE,
   summarizeSystem, CARDS_SYSTEM, cardsUser,
   EXPLAIN_SYSTEM, explainUser,
-  QUIZ_SYSTEM, quizUser
+  QUIZ_SYSTEM, quizUser,
+  NODE_CARD_SYSTEM, nodeCardUser
 };

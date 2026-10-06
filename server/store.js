@@ -6,6 +6,10 @@
  *   notes        : id, user_id, title, content, source_type, source_id, tags, created_at, updated_at
  *   cards        : id, note_id, user_id, front, back, tags, interval, ease, due, reps, last_reviewed_at
  *   review_logs  : id, card_id, rating, created_at
+ *   node_cards   : { <节点key>: { key, name, definition, formula, relations, example,
+ *                                 pitfalls, mermaid, text, model, created_at } }
+ *                  —— 节点知识卡片的**公共缓存**（与用户无关：同一个知识点生成一次，
+ *                     之后所有访问者都直接读缓存，不再重复调用 AI）
  *
  * 存储位置：<项目根>/.data/store.json
  *   · 目录以 . 开头，已被 server.js 的静态托管屏蔽，且写进 .gitignore
@@ -25,7 +29,7 @@ const DIR = process.env.AEROKG_DATA_DIR
   || (process.env.VERCEL ? '/tmp/aerokg-data' : path.join(ROOT, '.data'));
 const FILE = path.join(DIR, 'store.json');
 
-const state = { version: 1, notes: [], cards: [], review_logs: [] };
+const state = { version: 1, notes: [], cards: [], review_logs: [], node_cards: {} };
 let ready = false;
 let lastError = null;
 
@@ -39,6 +43,9 @@ function ensure() {
       if (Array.isArray(parsed.notes)) state.notes = parsed.notes;
       if (Array.isArray(parsed.cards)) state.cards = parsed.cards;
       if (Array.isArray(parsed.review_logs)) state.review_logs = parsed.review_logs;
+      if (parsed.node_cards && typeof parsed.node_cards === 'object' && !Array.isArray(parsed.node_cards)) {
+        state.node_cards = parsed.node_cards;
+      }
     }
   } catch (e) {
     // 首次运行（文件不存在）或文件损坏 → 当作空库，不阻断服务
@@ -277,6 +284,27 @@ function previewSchedule(card, rating) {
   return nextSchedule(card, rating);
 }
 
+/* ═══════════════ 节点知识卡片缓存 ═══════════════
+   与用户无关的公共缓存：同一个知识点只让 AI 生成一次。
+   命中即返回，调用方据此跳过 AI 调用（省时间也省钱）。
+   ═══════════════════════════════════════════════ */
+function getNodeCard(key) {
+  ensure();
+  const c = state.node_cards[key];
+  return (c && typeof c === 'object') ? c : null;
+}
+function saveNodeCard(key, data) {
+  ensure();
+  const card = Object.assign({}, data, { key: key, created_at: now() });
+  state.node_cards[key] = card;
+  persist();
+  return card;
+}
+function nodeCardCount() {
+  ensure();
+  return Object.keys(state.node_cards).length;
+}
+
 function stats(userId) {
   ensure();
   const t = now();
@@ -287,6 +315,7 @@ function stats(userId) {
     due: mine.filter(c => (c.due || 0) <= t).length,
     learned: mine.filter(c => (c.reps || 0) > 0).length,
     reviews: state.review_logs.filter(l => l.user_id === userId).length,
+    node_cards: nodeCardCount(),
     storage: { file: FILE.replace(/\\/g, '/'), error: lastError }
   };
 }
@@ -297,6 +326,7 @@ module.exports = {
   listNotes, getNote, createNote, updateNote, deleteNote,
   listCards, getCard, addCards, updateCard, deleteCard,
   dueCards, reviewCard, previewSchedule, stats,
+  getNodeCard, saveNodeCard, nodeCardCount,
   _file: FILE,
   _state: state
 };

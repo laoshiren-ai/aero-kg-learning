@@ -9,6 +9,7 @@
  * 接口一览
  *   POST   /api/chat                    智谱代理（即时问答 / AI 学习路径）
  *   POST   /api/summarize/keywords       多关键词 AI 综述 + Mermaid 关系图
+ *   POST   /api/node-card                节点知识卡片（无本地示意图的知识点用；带公共缓存）
  *   GET    /api/notes                    笔记列表
  *   POST   /api/notes                    新建笔记
  *   GET    /api/notes/:id                笔记详情
@@ -50,6 +51,7 @@ const chat = require('./server/chat');
 const summarize = require('./server/summarize');
 const notes = require('./server/notes');
 const cards = require('./server/cards');
+const nodecard = require('./server/nodecard');
 
 /* ─────────── 静态资源 ─────────── */
 // 绝不通过 HTTP 暴露的文件（server-config.json 含 API Key；server.js/package.json 属实现细节）
@@ -250,6 +252,7 @@ const ROUTES = [
   ['POST', '/api/chat', chat.handleChat],
   ['GET', '/api/chat', chat.handleChat],
   ['POST', '/api/summarize/keywords', summarize.keywords],
+  ['POST', '/api/node-card', nodecard.get],
 
   ['GET', '/api/notes', notes.list],
   ['POST', '/api/notes', notes.create],

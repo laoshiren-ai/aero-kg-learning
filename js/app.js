@@ -140,10 +140,7 @@
           ${rels || '<div class="guide-muted">暂无关系数据</div>'}
         </div>
 
-        <div class="detail-sec">
-          <h4>🖼️ 图文 / 视频</h4>
-          ${this.mediaHtml(n)}
-        </div>
+        ${this.mediaSection(n)}
 
         ${sugg ? `<div class="detail-sec">
           <div class="suggest-box">
@@ -170,39 +167,64 @@
 
       // 详情页刚插入了新图片 → 重新触发全局放大绑定（滚轮/拖拽/全屏）
       if (window.AeroLightbox) AeroLightbox.refresh(body);
+      // 没有本地示意图的节点 → 拉取 AI 知识卡片（有缓存则瞬时出）
+      if (!this.nodeImage(n)) this.loadNodeCard(n);
     },
 
-    /* ── 图文 / 视频：imageUrl 有值 → 真图 + 点击放大；为空 → "暂无图片" ── */
-    mediaHtml(n) {
+    /* ── 媒体区 ──
+       有本地图 → 真图（点击全屏 / 滚轮缩放 / 拖拽）；
+       没有本地图 → AI 知识卡片，不再显示"图片待补充"。
+       （26 张核心图保留，其余节点不强行配图 —— 见用户 2026-10-06 的规则） */
+    nodeImage(n) {
       const m = n.media || {};
-      const img = n.imageUrl || m.imageUrl || '';
+      return n.imageUrl || m.imageUrl || '';
+    },
+
+    mediaSection(n) {
+      const m = n.media || {};
+      const img = this.nodeImage(n);
       const vid = n.videoUrl || m.videoUrl || '';
       const cap = n.imageCaption || m.caption || (n.name + ' 示意图');
       const vcap = n.videoCaption || m.videoCaption || (n.name + ' 讲解视频');
-
-      const imgBlock = img
-        ? `<figure class="media-fig">
-             <img class="zoomable" src="${esc(img)}" data-caption="${esc(cap)}" alt="${esc(cap)}" loading="lazy" draggable="false"
-                  onerror="this.closest('figure').classList.add('img-missing');this.remove();if(window.AeroLightbox)AeroLightbox.refresh(document.body);">
-             <span class="zoom-hint">🔍 点击放大</span>
-             <div class="media-ph media-ph-fallback"><span class="mi">🖼️</span><span>图片待补充<br><code>${esc(img)}</code></span></div>
-             <figcaption>${esc(cap)}</figcaption>
-           </figure>`
-        : `<div class="media-ph"><span class="mi">🖼️</span>暂无图片</div>`;
 
       const vidBlock = vid
         ? `<figure class="media-fig media-fig-video">
              <video class="media-video" src="${esc(vid)}" controls playsinline preload="metadata"></video>
              <figcaption>${esc(vcap)}</figcaption>
            </figure>`
-        : `<div class="media-ph"><span class="mi">🎬</span>视频占位</div>`;
+        : '';
 
-      const note = m.note || ((img || vid) ? '' :
-        '本站为演示项目，媒体区暂为占位。建议来源：NASA 官网、维基百科「' + n.name + '」词条、B站公开课检索「' + n.name + '」。');
+      /* ① 有本地示意图 → 图片照旧 */
+      if (img) {
+        const imgBlock = `<figure class="media-fig">
+             <img class="zoomable" src="${esc(img)}" data-caption="${esc(cap)}" alt="${esc(cap)}" loading="lazy" draggable="false"
+                  onerror="this.closest('figure').classList.add('img-missing');this.remove();if(window.AeroLightbox)AeroLightbox.refresh(document.body);">
+             <span class="zoom-hint">🔍 点击放大</span>
+             <div class="media-ph media-ph-fallback"><span class="mi">🖼️</span><span>图片待补充<br><code>${esc(img)}</code></span></div>
+             <figcaption>${esc(cap)}</figcaption>
+           </figure>`;
+        return `
+        <div class="detail-sec">
+          <h4>🖼️ 图文 / 视频</h4>
+          <div class="media-grid has-img">${imgBlock}${vidBlock}</div>
+          ${m.note ? `<div class="media-note">${esc(m.note)}</div>` : ''}
+        </div>`;
+      }
 
+      /* ② 没有本地图 → AI 知识卡片（替代"图片待补充"） */
       return `
-          <div class="media-grid ${img ? 'has-img' : ''}">${imgBlock}${vidBlock}</div>
-          ${note ? `<div class="media-note">${esc(note)}</div>` : ''}`;
+        <div class="detail-sec">
+          <h4>🎴 AI 知识卡片</h4>
+          <div class="ncard-host" id="nodeCardHost"></div>
+        </div>
+        ${vidBlock ? `<div class="detail-sec"><h4>🎬 视频</h4><div class="media-grid">${vidBlock}</div></div>` : ''}`;
+    },
+
+    /** 异步把知识卡片填进 #nodeCardHost（浏览器有缓存则瞬时出） */
+    loadNodeCard(n) {
+      const host = $('nodeCardHost');
+      if (!host) return;
+      if (window.AeroNodeCard) AeroNodeCard.render(n, host);
     },
 
     /* ── 概念（含关系解释）一键存为笔记 ── */
